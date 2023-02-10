@@ -1,2 +1,4 @@
 # bitstaemr
-public repo for bitstaemr routines
+welcome to the repo
+
+
