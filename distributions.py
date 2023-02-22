@@ -22,4 +22,3 @@ def createBinomialData(n, p, size):
 
 def createBernoulliData(p,size):
     return stats.bernoulli.rvs(p = p,size = size)
-    
