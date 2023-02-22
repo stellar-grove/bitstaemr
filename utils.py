@@ -9,3 +9,4 @@ import re
 def removeCharacters(text):
     text = re.sub(r'\W+',"",text)
     return text
+
