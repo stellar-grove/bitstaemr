@@ -6,3 +6,6 @@ The intent of this repo is to provide simple tools for anyone to use, and showca
 The work contained in this public repo is by no means the extent of the capabilities at bitstaemr, however hopefully there are a few nuggest of joy in here for someone to use.
 
 Enjoy!
+
+## Packages
+See below for a list of functions, files, and packages that can help make thing run easier for you.
