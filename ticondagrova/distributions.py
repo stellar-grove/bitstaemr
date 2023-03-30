@@ -3,9 +3,6 @@ import scipy.stats as stats
 import random
 import pandas as pd
 
-def FUCKYOU():
-    return "JUST KIDDING"
-
 def TSP(LowBound, Middle , UpperBound, n):
     # Set any upfront variables
     params = [LowBound, Middle, UpperBound]
