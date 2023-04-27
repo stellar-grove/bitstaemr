@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 import numpy as np
-
+import sys; sys.path.append("../")
 
 # ----------------------------------------------
 # Package Wide Variables
