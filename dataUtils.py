@@ -1,16 +1,17 @@
 import os
-import sys
+import sys; sys.path.append("../")
 import pandas as pd
-
+import constants
 
 class LowCostDataInfrastructure(object):
 
-    dbLocation = "C:/Users/DanielKorpon/Stellar Grove/dkorpon - Documents/data"
+    dbLocation = constants.dbLocation
 
     def __init__(self,config={}) -> None:
         self.config = {"dbLocation":self.dbLocation}
         self.stats = {"error_details": []}
         self.data = {}
+        self.log = {}
 
     def getDatabaseLocation(self):
         return self.dbLocation
@@ -26,6 +27,7 @@ class LowCostDataInfrastructure(object):
     def createNewDatabase(self, dbName: str):
         dbName = f'{self.dbLocation}/{dbName}'
         os.mkdir(dbName)
+        return
     
     def createNewSchema(self, dbPath: str, schemaName: str):
         schemaName = f'{dbPath}/{schemaName}'
