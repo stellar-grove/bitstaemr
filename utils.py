@@ -15,7 +15,6 @@ userName = os.environ["USERNAME"]
 server={"name":f'{computerName}\SQLEXPRESS'}
 
 
-
 # ------  Begin Functions -------------------
 # Removes special characters from text to give you a string of case
 # sensative text that can serve as an ID.  To use on a DataFrame
