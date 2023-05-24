@@ -13,6 +13,8 @@ See below for a list of functions, files, and packages that can help make thing 
 * simulators
 * utils
 * dataUtils
+* Low Cost Data Infrastructure (LCDI)
+<li>Overview This package is intended to allow you to store data on your local drive, and interact with it as though it was a database. Yes, there are a ton of other low cost solutions you can take advanatage of, but if you don't like any of those, feel free to try this one. </li>
 
 
 ## Notebooks

@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 import numpy as np
-
+import datetime
 
 # ----------------------------------------------
 # Package Wide Variables
@@ -50,4 +50,14 @@ def get_llaves(key_set=None):
     
     return llaves
 
-
+def findDateXDaysAgo(days):
+    if type(days)==pd.DataFrame:
+        days['Birthdate'] = datetime.now().date() - days['Age_Days']
+        return days
+    if type(days) in [float,int]:
+        days = datetime.now().date() - days
+        return days
+    if type(days) in [str]:
+        days = days.astype(float)
+        days = datetime.now().date() - days
+        return days
