@@ -12,7 +12,8 @@ import datetime
 llaves = {}
 computerName = os.environ["COMPUTERNAME"]
 userName = os.environ["USERNAME"]
-server={"name":f'{computerName}\SQLEXPRESS'}
+server={"name":f'{computerName}SQLEXPRESS'}
+
 
 
 # ------  Begin Functions -------------------
@@ -23,6 +24,10 @@ server={"name":f'{computerName}\SQLEXPRESS'}
 def removeCharacters(text):
     text = re.sub(r'\W+',"",text)
     return text
+
+def addNumber(number):
+    number = number + number
+    return number
 
 # ----------------------------------------------
 # Returns working directories and keys

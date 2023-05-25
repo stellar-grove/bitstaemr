@@ -1,8 +1,8 @@
 dk_repo = "C:/repo/bitstaemr/bitstaemr"
-sg_repo = "C:/stellar-grove/bitstaemr"
+sg_repo = "C:/stellar-grove/"
 import sys;sys.path.append(dk_repo);sys.path.append(sg_repo)
 import pandas as pd
-import dkUtils.tools as tools
+import utils as tools
 import tara.distributions as dists
 from tara.distributions import DaCountDeMonteCarlo as dcmc
 import numpy as np
