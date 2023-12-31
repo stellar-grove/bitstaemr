@@ -2,7 +2,7 @@ dk_repo = "C:/repo/bitstaemr/bitstaemr"
 sg_repo = "C:/stellar-grove/"
 import sys;sys.path.append(dk_repo);sys.path.append(sg_repo)
 import pandas as pd
-import utils as tools
+import bitstaemr.utils as tools
 import tara.distributions as dists
 from tara.distributions import DaCountDeMonteCarlo as dcmc
 import numpy as np
@@ -326,3 +326,34 @@ class biostats(object):
 
         """
         self.patient["PatientDescription"] = description.strip()
+
+import modsim as sim
+class SimCity(object):
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.stats = {"error_details": []}
+        self.data = {}
+        self.patient = {}
+    class bike(object):
+        def bikeshare(spotA, spotB):
+            bikeshare = sim.State(spotA=10, spotB=2)
+        def bike_to_a():
+            bikeshare.spotB -= 1
+            bikeshare.spotA += 1
+        def bike_to_b():
+            bikeshare.spotB += 1
+            bikeshare.spotA -= 1    
+        def generate_prob(probability):
+            return np.random.random() < probability
+        def step(prob1, prob2):
+            if generate_prob(prob1):
+                bike_to_a()
+            if generate_prob(prob2):
+                bike_to_b()
+        def gen_TS(steps):
+            results = sim.TimeSeries()
+            for i in range(steps):
+                print(i)
+                step(0.6,0.6)
+                results[i+1] = bikeshare.spotA
+            return results
