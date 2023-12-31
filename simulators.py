@@ -2,7 +2,7 @@ dk_repo = "C:/repo/bitstaemr/bitstaemr"
 sg_repo = "C:/stellar-grove/bitstaemr"
 import sys;sys.path.append(dk_repo);sys.path.append(sg_repo)
 import pandas as pd
-import dkUtils.tools as tools
+#import dkUtils.tools as tools
 import tara.distributions as dists
 from tara.distributions import DaCountDeMonteCarlo as dcmc
 import numpy as np
@@ -326,3 +326,29 @@ class biostats(object):
 
         """
         self.patient["PatientDescription"] = description.strip()
+
+
+import modsim as sim
+class MSP(object):
+
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.stats = {"error_details": []}
+        self.data = {}
+
+    
+    def setInitialStates(lstInitialStates):
+        a = lstInitialStates[0]; b = lstInitialStates[1]
+        sm = sim.State(spotA = a,spotB = b)
+        return sm
+
+    def ItemToA(sm):
+        sm.spotA += 1
+        sm.spotB -= 1
+        
+    
+    def ItemToB(sm):
+        sm.spotA -= 1
+        sm.spotB += 1
+
+    
