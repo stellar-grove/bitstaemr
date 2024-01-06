@@ -327,28 +327,19 @@ class biostats(object):
         """
         self.patient["PatientDescription"] = description.strip()
 
-
-import modsim as sim
-class MSP(object):
-
-    def __init__(self,config={}) -> None:
-        self.config = config
+class planetaryorbit(object):
+    def __init__(self) -> None:
+        self.config = {}
         self.stats = {"error_details": []}
         self.data = {}
+        self.system = {}
 
-    
-    def setInitialStates(lstInitialStates):
-        a = lstInitialStates[0]; b = lstInitialStates[1]
-        sm = sim.State(spotA = a,spotB = b)
-        return sm
-
-    def ItemToA(sm):
-        sm.spotA += 1
-        sm.spotB -= 1
-        
-    
-    def ItemToB(sm):
-        sm.spotA -= 1
-        sm.spotB += 1
-
-    
+    def defineSystem(self,dictParameters):
+        centerObjectName = dictParameters["centerObjectName"]
+        NumberOfPlanets = dictParameters["NumberOfPlanets"]
+        CenterDistance = dictParameters["CenterDistance"]
+        self.system.update(centerObjectName = centerObjectName,
+                           NumberOfPlanets = NumberOfPlanets,
+                           CenterDistance=CenterDistance)
+        return self.system
+     
