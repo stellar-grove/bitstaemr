@@ -342,4 +342,3 @@ class planetaryorbit(object):
                            NumberOfPlanets = NumberOfPlanets,
                            CenterDistance=CenterDistance)
         return self.system
-     
