@@ -327,7 +327,6 @@ class biostats(object):
         """
         self.patient["PatientDescription"] = description.strip()
 
-
 import modsim as sim
 class MSP(object):
 
@@ -351,4 +350,19 @@ class MSP(object):
         sm.spotA -= 1
         sm.spotB += 1
 
-    
+class planetaryorbit(object):
+    def __init__(self) -> None:
+        self.config = {}
+        self.stats = {"error_details": []}
+        self.data = {}
+        self.system = {}
+
+    def defineSystem(self,dictParameters):
+        centerObjectName = dictParameters["centerObjectName"]
+        NumberOfPlanets = dictParameters["NumberOfPlanets"]
+        CenterDistance = dictParameters["CenterDistance"]
+        self.system.update(centerObjectName = centerObjectName,
+                           NumberOfPlanets = NumberOfPlanets,
+                           CenterDistance=CenterDistance)
+        return self.system
+

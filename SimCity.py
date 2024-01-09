@@ -2,7 +2,6 @@ import modsim as sim
 
 class bikeshare(object):
 
-
     def __init__(self,config={}) -> None:
         self.config = config
         self.stats = {"error_details": []}
