@@ -112,3 +112,121 @@ for p1 in p1_array:
     sweep[p1] = final_state.olin_empty
 
 sweep.plot(label = 'Olin', color = 'C1')
+
+
+# Chapter 5
+
+import pandas as pd
+
+url = 'https://en.wikipedia.org/wiki/Estimates_of_historical_world_population'
+
+filename = f'{url}World_population_estimates.html'
+tables = pd.read_html(url,header=0,index_col=0,decimal='M')
+table2 = tables[2]
+
+table2.columns = ['census', 'prb', 'un', 'maddison',
+                  'hyde', 'tanton', 'biraben', 'mj',
+                  'thomlinson', 'durand','clark']
+
+census = table2.census / 1e9
+census.tail()
+
+un = table2.un / 1e9
+un.tail()
+
+
+def plot_estimates():
+    census.plot(style=":", label='US Census')
+    un.plot(style="--", label=["UN DESA"]) 
+    sim.decorate(xlabel='Year', ylabel='World population (billions)')
+
+plot_estimates()    
+
+import numpy as np
+
+
+abs_error = abs(un - census)
+np.mean(abs_error)
+np.max(abs_error)
+
+rel_error = 100 * abs_error / census
+rel_error.tail()
+np.mean(rel_error)
+
+# MOdelling Population Growth
+census[1950]
+
+total_growth = census[2016] - census[1950]
+
+t_0 = census.index[0]
+t_0
+
+t_end = census.index[-1]
+t_end
+
+elapsed_time = t_end - t_0
+elapsed_time
+
+p_0 = census[t_0]
+p_end = census[t_end]
+
+total_growth = p_end - p_0
+total_growth
+
+annual_growth = total_growth / elapsed_time
+annual_growth
+
+results = sim.TimeSeries()
+
+results[t_0] = p_0
+
+for t in range(t_0, t_end):
+    results[t+1] = results[t] + annual_growth
+
+results.plot(color='gray', label='model')
+un.plot(style=":")
+plot_estimates()
+
+
+# Chapter 6
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+url = 'https://en.wikipedia.org/wiki/Estimates_of_historical_world_population'
+
+filename = f'{url}World_population_estimates.html'
+tables = pd.read_html(url,header=0,index_col=0,decimal='M')
+table2 = tables[2]
+
+table2.columns = ['census', 'prb', 'un', 'maddison',
+                  'hyde', 'tanton', 'biraben', 'mj',
+                  'thomlinson', 'durand','clark']
+
+census = table2.census / 1e9
+un = table2.un / 1e9
+t_0 = census.index[0]
+t_end = census.index[-1]
+elapsed_time = t_end - t_0
+
+p_0 = census[t_0]
+p_end = census[t_end]
+
+total_growth = p_end - p_0
+annual_growth = total_growth / elapsed_time
+
+system = sim.System(t_0=t_0,
+                    t_end=t_end,
+                    p_0=p_0,
+                    annual_growth=annual_growth)
+
+
+
+
+
+
+
+
+
+
+
