@@ -1,6 +1,5 @@
-dk_repo = "C:/repo/bitstaemr/bitstaemr"
 sg_repo = "C:/stellar-grove/bitstaemr"
-import sys;sys.path.append(dk_repo);sys.path.append(sg_repo)
+import sys;sys.path.append(sg_repo)
 import pandas as pd
 #import dkUtils.tools as tools
 import tara.distributions as dists
@@ -8,6 +7,7 @@ from tara.distributions import DaCountDeMonteCarlo as dcmc
 import numpy as np
 from num2words import num2words
 import datetime as dt
+import scipy.stats as stats
 
 def generatePersonalityType():
     # 0 Miserable, 1 Debbie Downer, 2 Even Steven, 3 Optimistic Oliver, 4 Richard Fucking Simons
@@ -366,3 +366,166 @@ class planetaryorbit(object):
                            CenterDistance=CenterDistance)
         return self.system
 
+
+# Da Count Helpers
+
+def getDefaultParameters():
+        dict_config = {
+            "sampleSize":100,
+            "tsp":{
+                    "name":"tsp",
+                    "low":13,
+                    "mid":18,
+                    "hi":25,
+                    "n":2
+                    },
+            "normal":{
+                    "name":"normal",
+                    "mean":3,
+                    "std":1.4
+                   },
+            "poisson":{
+                        "name":"poisson",
+                        "mu":4
+                    },
+            "binomial":{
+                        "name":"binomial",
+                        "n":5,
+                        "p":0.4
+                        },
+            "bernoulli":{
+                        "name":"bernoulli",
+                        "p":0.271
+                        }
+                
+        }
+        return dict_config
+
+def getDataFrameNames():
+    lst = ["dataframe", "df", "data-frame"]
+    return lst
+
+class DaCountDeMonteCarlo(object):
+    def __init__(self,config={}) -> None:
+        self.config = getDefaultParameters()
+        self.stats = {"error_details": []}
+        self.data = {}
+
+    def setParameters(self,dict_update):
+        self.config.update(dict_update)
+
+    def generateSingleSample(self, dict_distribution):
+        dfOutput = pd.DataFrame(self.createUniformData(0, 1, self.config["sampleSize"]), columns=["uniSample"])
+        if dict_distribution["distributionName"].lower() in ["tsp","twosidedpower","two-sided-power"]:
+            listParameters = [dict_distribution["distributionParameters"]["low"],
+                                dict_distribution["distributionParameters"]["mid"],
+                                dict_distribution["distributionParameters"]["high"],
+                                dict_distribution["distributionParameters"]["n"]
+                                ]
+            print(listParameters)
+            dfOutput.loc[:,"TSP"] = dfOutput["uniSample"].apply(lambda x: generateTSP(listParameters, x))
+        if dict_distribution["distributionName"].lower() == "normal":
+            listParameters = [dict_distribution["distributionParameters"]["mean"],dict_distribution["distributionParameters"]["std"]]
+            dfOutput.loc[:,"Normal"] = dfOutput["uniSample"].apply(lambda x: self.sampleFromNormal(listParameters[0], listParameters[1], x))
+        if dict_distribution["distributionName"].lower() == "poisson":
+            listParameters = [dict_distribution["distributionParameters"]["mu"]]
+            dfOutput.loc[:,"Poisson"] = dfOutput["uniSample"].apply(lambda x: self.sampleFromPoisson(listParameters[0], x))
+        return dfOutput
+
+#------------------------------------------------------------------------------------------------------------------------------
+#   Functions to sample data from a distribution.
+#   These functions generate the value of a distribution, given a percentile.  This is different 
+#------------------------------------------------------------------------------------------------------------------------------
+
+    def sampleFromNormal(self, mean, std, sample):
+        z = stats.norm.ppf(sample)
+        sampledValue = mean + (z * std)
+        return sampledValue
+    
+    def sampleFromPoisson(self, mu, sample):
+        value = stats.poisson.ppf(sample, mu)
+        return value
+
+    def sampleFromBernoulli(self, sample, p, loc):
+        sampledValue = stats.bernoulli.ppf(sample, p, loc)
+        return sampledValue
+    
+    def sampleFromBinomial(self, sample, n, p, loc):
+        sampledValue = stats.binom.ppf(sample, n, p, loc)
+        return sampledValue
+    def sampleFromGamma(self, sample, alpha, loc, scale):
+        sampledValue = stats.gamma.ppf(sample, alpha, loc, scale)
+        return sampledValue
+    
+    def sampleFromExponential(self, sample, loc, scale):
+        sampledValue = stats.expon.ppf(sample, loc, scale)
+        return sampledValue
+    
+    def sampleFromBeta(self, sample, a, b, loc, scale):
+        sampledValue = stats.beta.ppf(self, sample, a, b, loc, scale)
+        return sampledValue
+    
+
+#------------------------------------------------------------------------------------------------------------------------------
+#   Functions to create data
+#   The functions below are intended to be used as helper functions that generated data needed to run analyses.  The class
+#   contains these functions because ultimately the class is devoted to monte carlo simulations, and needing to generate random
+#   samples from a distribution are needed.
+#------------------------------------------------------------------------------------------------------------------------------
+
+    def createPoissonData(self, mu, sampleSize, output = "list"):
+        lst = stats.poisson.rvs(mu,sampleSize)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    def createUniformData(a, b, sampleSize, output = "list"):
+        lst = np.random.uniform(a, b, sampleSize)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    def createNormalData(self, mean,std,size,output = "list"):
+        lst = stats.norm.rvs(mean,std,size)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    def createGammaData(self, alpha, size, output = "list"):
+        lst = stats.gamma.rvs(alpha,size)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    # This requires that you pass the scale as equal to 1/lambda
+    def createExponentialData(self, scale,location,size, output = "list"):
+        lst = stats.expon.rvs(scale=(scale),loc=location,size=size)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    def createBinomialData(self, n, p, size, output = "list"):
+        lst = stats.binom.rvs(n,p,size)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    def createBernoulliData(self, p, loc, size, output = "list"):
+        lst = stats.bernoulli.rvs(p, loc ,size)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
+
+    def createBetaData(self, a, b, loc, scale, size, output = "list"):
+        lst = stats.beta.rvs(a, b, loc, scale, size)
+        if output.lower() in ["list"]: lst
+        if output.lower() in getDataFrameNames(): lst = pd.DataFrame(lst,columns=["GeneratedData"])
+        if output.lower() in ["dict","dictionary"]: lst = dict(zip(range(0,len(lst)),lst))
+        return lst
