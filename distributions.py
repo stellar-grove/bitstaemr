@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.stats as stats
-import random
 import pandas as pd
 import sys; sys.path.append("../")
 
@@ -107,7 +106,7 @@ class TwoSidedPower(object):
         """
 
         listSample = np.random.uniform(0, 1, size)
-        listValues = [generateTSP(parameterList, sample) for sample in listSample]
+        listValues = [TwoSidedPower.generateTSP(parameterList, sample) for sample in listSample]
         listCombined = [listSample, listValues]
         dfSample = pd.DataFrame(listCombined).T
         dfSample.columns = ["randomSampleValue", "GeneratedTSPValue"]
@@ -167,7 +166,7 @@ class DaCountDeMonteCarlo(object):
     """
 
     def __init__(self,config={}) -> None:
-        self.config = getDefaultParameters()
+        self.config = Helpers.getDefaultParameters()
         self.stats = {"error_details": []}
         self.data = {}
 
@@ -183,7 +182,7 @@ class DaCountDeMonteCarlo(object):
                                 dict_distribution["distributionParameters"]["n"]
                                 ]
             print(listParameters)
-            dfOutput.loc[:,"TSP"] = dfOutput["uniSample"].apply(lambda x: generateTSP(listParameters, x))
+            dfOutput.loc[:,"TSP"] = dfOutput["uniSample"].apply(lambda x: TwoSidedPower.generateTSP(listParameters, x))
         if dict_distribution["distributionName"].lower() == "normal":
             listParameters = [dict_distribution["distributionParameters"]["mean"],dict_distribution["distributionParameters"]["std"]]
             dfOutput.loc[:,"Normal"] = dfOutput["uniSample"].apply(lambda x: self.sampleFromNormal(listParameters[0], listParameters[1], x))
