@@ -1,20 +1,17 @@
-dk_repo = "C:/repo/bitstaemr/bitstaemr"
 sg_repo = "C:/stellar-grove/bitstaemr"
-import sys;sys.path.append(dk_repo);sys.path.append(sg_repo)
+import sys;sys.path.append(sg_repo)
 import pandas as pd
 #import dkUtils.tools as tools
 import tara.distributions as dists
-from tara.distributions import DaCountDeMonteCarlo as dcmc
+import distributions as dists
 import numpy as np
 from num2words import num2words
 import datetime as dt
+import scipy.stats as stats
 
-def generatePersonalityType():
-    # 0 Miserable, 1 Debbie Downer, 2 Even Steven, 3 Optimistic Oliver, 4 Richard Fucking Simons
-    # Generate a random number between 0 and 4 to designate the personality type.
-    personalityType = int(np.floor(dcmc.createUniformData(dcmc,0, 5, 1)[0]))
-    return personalityType
-
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       PERT                                                                 |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class PERT(object):
     def __init__(self,config={}) -> None:
         self.config = config
@@ -37,17 +34,30 @@ class PERT(object):
         df = pd.DataFrame()
         return df
 
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Biostatistics                                                        |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class biostats(object):
     def __init__(self,config={}) -> None:
         self.config = config
         self.stats = {"error_details": []}
         self.data = {}
         self.patient = {}
-         
+
+#--------------------------------------------------------------------------------------------------------
+# Clearing
+#--------------------------------------------------------------------------------------------------------      
     def clearPatient(self):
         self.patient = {}
-    
+
+    def clearCohort(self):
+        if "cohort" in self.data.keys():
+            self.data["cohort"] = {}
+#--------------------------------------------------------------------------------------------------------
+# Creating 
+#--------------------------------------------------------------------------------------------------------    
     def createPatient(self):
+        
         self.generateGender()
         self.generateAge()
         self.generateBP()
@@ -55,18 +65,31 @@ class biostats(object):
         self.generateBMI()
         self.generatePhysicalActivity()
         self.generateDiabetes()
-        self.generateSWLS()
+        self.generatePersonalityType()
         self.generatePSS()
+        self.generateSWLS()        
         self.generateSTAI()
         return self.patient
 
-    def createCohort(self,cohortSize):
+    def createCohort(self,cohortSize:int,storeDf:bool=True):
         dfCohort = pd.DataFrame()
+        print("OK")
         for i in range(cohortSize):
             df = pd.DataFrame().from_dict(self.createPatient(),orient="index")
             df = df[:-4].T
             dfCohort = pd.concat([dfCohort,df])
+        if storeDf:
+            self.data["cohort"] = dfCohort
         return dfCohort
+ 
+#--------------------------------------------------------------------------------------------------------
+# Generating 
+#--------------------------------------------------------------------------------------------------------
+    def generatePersonalityType(self):
+    # 0 Miserable, 1 Debbie Downer, 2 Even Steven, 3 Optimistic Oliver, 4 Richard Fucking Simons
+    # Generate a random number between 0 and 4 to designate the personality type.
+        pt = int(np.random.randint(5))
+        self.patient["PersonalityType"] = pt
 
     def generateGender(self):
         genderValue = np.round(np.random.rand(),0)
@@ -82,7 +105,7 @@ class biostats(object):
         age = dcmc.sampleFromNormal(dcmc,mean = mean, std = std, sample = sample)
         ageDays = age * 365.25
         birthDate = dt.datetime.now() - pd.to_timedelta(ageDays,"D")
-        age = np.round(age,2)
+        age = float(np.round(age,2))
         self.patient["age"] = age
         self.patient["birthDate"] = birthDate.strftime("%Y-%m-%d")
 
@@ -223,8 +246,7 @@ class biostats(object):
         self.patient["MedicationUse"] = medicationUse
 
     def generateSWLS(self,individualReponses = False):
-        
-        personalityType = generatePersonalityType()
+        personalityType = self.patient["PersonalityType"]
         # Create the bounds of how high the personality can score on each of the 5 questions
         listBounds = [
                         [0,3], # Miserable
@@ -253,7 +275,7 @@ class biostats(object):
             self.patient["SWLS"] = dictResponse
 
     def generatePSS(self, individualRespones = False):
-        personalityType = generatePersonalityType()
+        personalityType = self.patient["PersonalityType"]
         # Create the bounds of how high the personality can score on each of the 5 questions
         listBounds = [
                         [0,1], # Miserable
@@ -278,9 +300,8 @@ class biostats(object):
             dictResponse = {"total":PSS}
             self.patient["PSS"] = dictResponse
         
-    
     def generateSTAI(self, individualResponses = False):
-        personalityType = generatePersonalityType()
+        personalityType = self.patient["PersonalityType"]
         # Create the bounds of how high the personality can score on each of the 5 questions
         listBounds = [
                         [0.2], # Miserable
@@ -316,7 +337,6 @@ class biostats(object):
             self.patient["STAIS"] = {"total":STAIS}
             self.patient["STAIT"] = {"total":STAIT}
 
-
     def generatePatientDescription(self):
         description = f"""
         The patient is a {self.patient["age"]} year-old {self.patient["genderName"]}.
@@ -326,8 +346,18 @@ class biostats(object):
 
         """
         self.patient["PatientDescription"] = description.strip()
+ 
+#--------------------------------------------------------------------------------------------------------
+ # Display
+ #--------------------------------------------------------------------------------------------------------
+    def displayFeature(self,feature:str):
+        # Check to make sure that the feature is in the data dictionary
+        if feature in self.data["cohort"].keys:
+            True
 
-
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Modeling and Simulation Using Python                                 |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 import modsim as sim
 class MSP(object):
 
@@ -351,4 +381,118 @@ class MSP(object):
         sm.spotA -= 1
         sm.spotB += 1
 
-    
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Planetary Orbits                                                     |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+class planetaryorbit(object):
+    def __init__(self) -> None:
+        self.config = {}
+        self.stats = {"error_details": []}
+        self.data = {}
+        self.system = {}
+
+    def defineSystem(self,dictParameters):
+        centerObjectName = dictParameters["centerObjectName"]
+        NumberOfPlanets = dictParameters["NumberOfPlanets"]
+        CenterDistance = dictParameters["CenterDistance"]
+        self.system.update(centerObjectName = centerObjectName,
+                           NumberOfPlanets = NumberOfPlanets,
+                           CenterDistance=CenterDistance)
+        return self.system
+
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       MCMC Modelling                                                       |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+class MarkovPlaysTetris(object):
+    def __init__(self) -> None:
+        self.config = {}
+        self.stats = {"error_details": []}
+        self.data = {}
+        self.system = {}
+
+    def target_distribution(x):
+        return np.exp(-x**2)
+
+    def proposal_distribution(x):
+        return np.random.normal(loc=x, scale=1)
+
+    def metropolis_hastings(self, iterations)->tuple:
+        samples = []
+        current_x = 0
+        for i in range(iterations):
+            current_x = self.proposal_distribution(current_x)
+            acceptance_ratio = self.target_distribution(current_x) / self.target_distribution(samples[-1])
+            if np.random.uniform() < acceptance_ratio:
+                samples.append(current_x)
+            else:
+                samples.append(samples[-1])
+        
+        return np.array(samples), acceptance_ratio
+
+
+
+# Grok Inspired  
+from Bio import SeqIO
+from Bio.SeqFeature import SeqFeature, FeatureLocation
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+
+class GrokSays(object):
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.stats = {"error_details": []}
+        self.data = {}
+
+    # Load the genome sequence
+    def load_genome(file_path):
+        genome_seq = SeqIO.read(file_path, 'fasta')
+        return str(genome_seq.seq)
+
+    # Define a function to identify genes using a simple pattern matching approach
+    def find_genes(genome_seq, gene_patterns):
+        genes = []
+        for gene_pattern in gene_patterns:
+            match = gene_pattern.search(genome_seq)
+            if match:
+                start, end = match.span()
+                genes.append((gene_pattern.pattern, start, end))
+        return genes
+
+    # Define a simple classification model
+    def classify_creature(training_data, test_data):
+        X_train, X_test, y_train, y_test = train_test_split(training_data[0], training_data[1], test_size=0.2, random_state=42)
+
+        clf = svm.SVC(kernel='linear', C=1)
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+
+        accuracy = accuracy_score(y_test, y_pred)
+        print(f'Accuracy: {accuracy}')
+
+        return clf.predict(test_data)
+
+    # Example usage:
+    genome_file_path = 'your_genome_file.fasta'
+    genome_seq = load_genome(genome_file_path)
+
+    # Define gene patterns to search for
+    gene_patterns = [
+        r'ATG\w{10}TGA',  # Example pattern for a start codon (ATG) followed by 10 nucleotides and a stop codon (TGA)
+    ]
+
+    # Find genes in the genome sequence
+    genes = find_genes(genome_seq, gene_patterns)
+    print(f'Found {len(genes)} genes:')
+    for gene in genes:
+        print(f'Gene: {gene[0]}')
+        print(f'Start: {gene[1]}')
+        print(f'End: {gene[2]}')
+
+    # Load or create training data and perform classification
+    # training_data = [training_features, training_labels]
+    # test_data = [test_features]
+
+    # classified_creature = classify_creature(training_data, test_data)
+    # print(f'The creature is classified as: {classified_creature}')
+
