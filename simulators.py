@@ -39,10 +39,19 @@ class biostats(object):
         self.stats = {"error_details": []}
         self.data = {}
         self.patient = {}
-        
+
+#--------------------------------------------------------------------------------------------------------
+# Clearing
+#--------------------------------------------------------------------------------------------------------      
     def clearPatient(self):
         self.patient = {}
-    
+
+    def clearCohort(self):
+        if "cohort" in self.data.keys():
+            self.data["cohort"] = {}
+#--------------------------------------------------------------------------------------------------------
+# Creating 
+#--------------------------------------------------------------------------------------------------------    
     def createPatient(self):
         
         self.generateGender()
@@ -58,15 +67,20 @@ class biostats(object):
         self.generateSTAI()
         return self.patient
 
-    def createCohort(self,cohortSize:int):
+    def createCohort(self,cohortSize:int,storeDf:bool=True):
         dfCohort = pd.DataFrame()
         print("OK")
         for i in range(cohortSize):
             df = pd.DataFrame().from_dict(self.createPatient(),orient="index")
             df = df[:-4].T
             dfCohort = pd.concat([dfCohort,df])
+        if storeDf:
+            self.data["cohort"] = dfCohort
         return dfCohort
-    
+ 
+#--------------------------------------------------------------------------------------------------------
+# Generating 
+#--------------------------------------------------------------------------------------------------------
     def generatePersonalityType(self):
     # 0 Miserable, 1 Debbie Downer, 2 Even Steven, 3 Optimistic Oliver, 4 Richard Fucking Simons
     # Generate a random number between 0 and 4 to designate the personality type.
@@ -328,6 +342,16 @@ class biostats(object):
 
         """
         self.patient["PatientDescription"] = description.strip()
+ 
+#--------------------------------------------------------------------------------------------------------
+ # Display
+ #--------------------------------------------------------------------------------------------------------
+    def displayFeature(self,feature:str):
+        # Check to make sure that the feature is in the data dictionary
+        if feature in self.data["cohort"].keys:
+            True
+
+
 
 import modsim as sim
 
