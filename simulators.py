@@ -1,16 +1,17 @@
-dk_repo = "C:/repo/bitstaemr/bitstaemr"
 sg_repo = "C:/stellar-grove/bitstaemr"
-import sys;sys.path.append(dk_repo);sys.path.append(sg_repo)
+import sys;sys.path.append(sg_repo)
 import pandas as pd
 #import dkUtils.tools as tools
 import tara.distributions as dists
-from tara.distributions import DaCountDeMonteCarlo as dcmc
+import distributions as dists
 import numpy as np
 from num2words import num2words
 import datetime as dt
+import scipy.stats as stats
 
-
-
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       PERT                                                                 |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class PERT(object):
     def __init__(self,config={}) -> None:
         self.config = config
@@ -33,6 +34,9 @@ class PERT(object):
         df = pd.DataFrame()
         return df
 
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Biostatistics                                                        |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class biostats(object):
     def __init__(self,config={}) -> None:
         self.config = config
@@ -351,10 +355,10 @@ class biostats(object):
         if feature in self.data["cohort"].keys:
             True
 
-
-
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Modeling and Simulation Using Python                                 |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 import modsim as sim
-
 class MSP(object):
 
     def __init__(self,config={}) -> None:
@@ -377,6 +381,9 @@ class MSP(object):
         sm.spotA -= 1
         sm.spotB += 1
 
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Planetary Orbits                                                     |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class planetaryorbit(object):
     def __init__(self) -> None:
         self.config = {}
@@ -393,6 +400,9 @@ class planetaryorbit(object):
                            CenterDistance=CenterDistance)
         return self.system
 
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       MCMC Modelling                                                       |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class MarkovPlaysTetris(object):
     def __init__(self) -> None:
         self.config = {}
@@ -419,4 +429,70 @@ class MarkovPlaysTetris(object):
         
         return np.array(samples), acceptance_ratio
 
-    
+
+
+# Grok Inspired  
+from Bio import SeqIO
+from Bio.SeqFeature import SeqFeature, FeatureLocation
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+
+class GrokSays(object):
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.stats = {"error_details": []}
+        self.data = {}
+
+    # Load the genome sequence
+    def load_genome(file_path):
+        genome_seq = SeqIO.read(file_path, 'fasta')
+        return str(genome_seq.seq)
+
+    # Define a function to identify genes using a simple pattern matching approach
+    def find_genes(genome_seq, gene_patterns):
+        genes = []
+        for gene_pattern in gene_patterns:
+            match = gene_pattern.search(genome_seq)
+            if match:
+                start, end = match.span()
+                genes.append((gene_pattern.pattern, start, end))
+        return genes
+
+    # Define a simple classification model
+    def classify_creature(training_data, test_data):
+        X_train, X_test, y_train, y_test = train_test_split(training_data[0], training_data[1], test_size=0.2, random_state=42)
+
+        clf = svm.SVC(kernel='linear', C=1)
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+
+        accuracy = accuracy_score(y_test, y_pred)
+        print(f'Accuracy: {accuracy}')
+
+        return clf.predict(test_data)
+
+    # Example usage:
+    genome_file_path = 'your_genome_file.fasta'
+    genome_seq = load_genome(genome_file_path)
+
+    # Define gene patterns to search for
+    gene_patterns = [
+        r'ATG\w{10}TGA',  # Example pattern for a start codon (ATG) followed by 10 nucleotides and a stop codon (TGA)
+    ]
+
+    # Find genes in the genome sequence
+    genes = find_genes(genome_seq, gene_patterns)
+    print(f'Found {len(genes)} genes:')
+    for gene in genes:
+        print(f'Gene: {gene[0]}')
+        print(f'Start: {gene[1]}')
+        print(f'End: {gene[2]}')
+
+    # Load or create training data and perform classification
+    # training_data = [training_features, training_labels]
+    # test_data = [test_features]
+
+    # classified_creature = classify_creature(training_data, test_data)
+    # print(f'The creature is classified as: {classified_creature}')
+

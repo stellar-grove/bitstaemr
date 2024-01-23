@@ -205,8 +205,8 @@ table2.columns = ['census', 'prb', 'un', 'maddison',
 
 census = table2.census / 1e9
 un = table2.un / 1e9
-t_0 = census.index[0]
-t_end = census.index[-1]
+t_0 = int(census.index[0])
+t_end = int(census.index[-1])
 elapsed_time = t_end - t_0
 
 p_0 = census[t_0]
@@ -219,6 +219,203 @@ system = sim.System(t_0=t_0,
                     t_end=t_end,
                     p_0=p_0,
                     annual_growth=annual_growth)
+
+
+def run_simulation1(system):
+    results = sim.TimeSeries()
+    results[system.t_0] = system.p_0
+
+    for t in range(int(system.t_0), int(system.t_end)):
+        results[t+1] = results[t] + system.annual_growth
+
+    return results
+    
+results1 = run_simulation1(system)
+
+def plot_estimates():
+    census.plot(style=":", label='US Census')
+    un.plot(style="--", label='UN DESA')
+    sim.decorate(xlabel="Year",
+                 ylabel="World Population (billions)")
+    
+results1.plot(label='model', color='gray')
+plot_estimates()
+sim.decorate(title="Constant growth model")
+
+
+# A Proporational Growth Model
+
+def run_simulation2(system):
+    results = sim.TimeSeries()
+    results[system.t_0] = system.p_0
+    
+    for t in range(int(system.t_0), int(system.t_end)):
+        births = system.birth_rate * results[t]
+        deaths = system.death_rate * results[t]
+        results[t+1] = results[t] + births - deaths
+        
+    return results
+
+system.death_rate = 7.7 / 1000
+system.birth_rate = 25 / 1000
+results2 = run_simulation2(system)
+results2.plot(label='model', color = 'gray')
+plot_estimates()
+sim.decorate(title='Proporational growth model')
+
+# Factoring Out the Update Function
+
+def growth_func1(t, pop, system):
+    births = system.birth_rate * pop
+    deaths = system.death_rate * pop
+    return births - deaths
+
+
+def run_simulation(system, growth_func):
+    results = sim.TimeSeries()
+    results[system.t_0] = system.p_0
+    
+    for t in range(int(system.t_0), int(system.t_end)):
+        growth = growth_func(t, results[t], system)
+        results[t+1] = results[t] + growth
+        
+    return results
+
+results = run_simulation(system, growth_func1)
+
+system.alpha = system.birth_rate - system.death_rate
+
+def growth_func2(t, pop, system):
+    return system.alpha * pop
+
+results = run_simulation(system,growth_func2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
