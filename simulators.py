@@ -548,9 +548,10 @@ class FlightPath(object):
     def set_obstacles(self,obstacleList):
         self.data['obstacles'] = obstacleList
 
-    def set_path(self):
-        path = [0,0]
-        return path
+    def set_path(self, n_steps=10):
+        flightpath = np.random.random(11)
+        self.data['path'] = flightpath.tolist()
+        return flightpath
 
     def calc_distance(position1:tuple, position2:tuple):
         x1, y1 = position1
