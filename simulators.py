@@ -549,7 +549,7 @@ class FlightPath(object):
         self.data['obstacles'] = obstacleList
 
     def set_path(self, n_steps=10):
-        flightpath = np.random.random(11)
+        flightpath = np.random.random_integers(low=-10,high=10,size=n_steps)
         self.data['path'] = flightpath.tolist()
         return flightpath
 
