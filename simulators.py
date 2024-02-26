@@ -358,6 +358,8 @@ class biostats(object):
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       Modeling and Simulation Using Python                                 |
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+
+
 import modsim as sim
 class MSP(object):
 
@@ -380,6 +382,40 @@ class MSP(object):
     def ItemToB(sm):
         sm.spotA -= 1
         sm.spotB += 1
+
+
+    def make_system(beta, gamma):
+        init = sim.State(s = 89, i = 1, r = 0)
+        init /= init.sum()
+        return sim.System(init=init, t_end=7*14,beta=beta, gamma=gamma)
+
+    def update_func(t, state, system):
+        s, i, r = state.s, state.i, state.r
+
+        infected = system.beta * i * s
+        recovered = system.gamma * i
+
+        s -= infected
+        i += infected - recovered
+        r += recovered
+
+        return sim.State(s=s, i=i, r=r)
+
+
+    def plot_results(S, I, R):
+        S.plot(style='--', label='Susceptible')
+        I.plot(style='-', label='Infected')
+        R.plot(style=':', label='Resistant')
+        sim.decorate(xlabel='Time (days)',
+                ylabel='Fraction of population')
+       
+    def run_simulation(system, update_func):
+        frame = sim.TimeFrame(columns=system.init.index)
+        frame.loc[0] = system.init
+        for t in range(0, system.t_end):
+            frame.loc[t+1] = update_func(t, frame.loc[t], system)
+        
+        return frame
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       Planetary Orbits                                                     |
@@ -443,56 +479,122 @@ class GrokSays(object):
         self.config = config
         self.stats = {"error_details": []}
         self.data = {}
+    """
+        # Load the genome sequence
+        def load_genome(file_path):
+            genome_seq = SeqIO.read(file_path, 'fasta')
+            return str(genome_seq.seq)
 
-    # Load the genome sequence
-    def load_genome(file_path):
-        genome_seq = SeqIO.read(file_path, 'fasta')
-        return str(genome_seq.seq)
+        # Define a function to identify genes using a simple pattern matching approach
+        def find_genes(genome_seq, gene_patterns):
+            genes = []
+            for gene_pattern in gene_patterns:
+                match = gene_pattern.search(genome_seq)
+                if match:
+                    start, end = match.span()
+                    genes.append((gene_pattern.pattern, start, end))
+            return genes
 
-    # Define a function to identify genes using a simple pattern matching approach
-    def find_genes(genome_seq, gene_patterns):
-        genes = []
-        for gene_pattern in gene_patterns:
-            match = gene_pattern.search(genome_seq)
-            if match:
-                start, end = match.span()
-                genes.append((gene_pattern.pattern, start, end))
-        return genes
+        # Define a simple classification model
+        def classify_creature(training_data, test_data):
+            X_train, X_test, y_train, y_test = train_test_split(training_data[0], training_data[1], test_size=0.2, random_state=42)
 
-    # Define a simple classification model
-    def classify_creature(training_data, test_data):
-        X_train, X_test, y_train, y_test = train_test_split(training_data[0], training_data[1], test_size=0.2, random_state=42)
+            clf = svm.SVC(kernel='linear', C=1)
+            clf.fit(X_train, y_train)
+            y_pred = clf.predict(X_test)
 
-        clf = svm.SVC(kernel='linear', C=1)
-        clf.fit(X_train, y_train)
-        y_pred = clf.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            print(f'Accuracy: {accuracy}')
 
-        accuracy = accuracy_score(y_test, y_pred)
-        print(f'Accuracy: {accuracy}')
+            return clf.predict(test_data)
 
-        return clf.predict(test_data)
+        # Example usage:
+        genome_file_path = 'your_genome_file.fasta'
+        genome_seq = load_genome(genome_file_path)
 
-    # Example usage:
-    genome_file_path = 'your_genome_file.fasta'
-    genome_seq = load_genome(genome_file_path)
+        # Define gene patterns to search for
+        gene_patterns = [
+            r'ATG\w{10}TGA',  # Example pattern for a start codon (ATG) followed by 10 nucleotides and a stop codon (TGA)
+        ]
 
-    # Define gene patterns to search for
-    gene_patterns = [
-        r'ATG\w{10}TGA',  # Example pattern for a start codon (ATG) followed by 10 nucleotides and a stop codon (TGA)
-    ]
+        # Find genes in the genome sequence
+        genes = find_genes(genome_seq, gene_patterns)
+        print(f'Found {len(genes)} genes:')
+        for gene in genes:
+            print(f'Gene: {gene[0]}')
+            print(f'Start: {gene[1]}')
+            print(f'End: {gene[2]}')
 
-    # Find genes in the genome sequence
-    genes = find_genes(genome_seq, gene_patterns)
-    print(f'Found {len(genes)} genes:')
-    for gene in genes:
-        print(f'Gene: {gene[0]}')
-        print(f'Start: {gene[1]}')
-        print(f'End: {gene[2]}')
+        # Load or create training data and perform classification
+        # training_data = [training_features, training_labels]
+        # test_data = [test_features]
 
-    # Load or create training data and perform classification
-    # training_data = [training_features, training_labels]
-    # test_data = [test_features]
+        # classified_creature = classify_creature(training_data, test_data)
+        # print(f'The creature is classified as: {classified_creature}')
 
-    # classified_creature = classify_creature(training_data, test_data)
-    # print(f'The creature is classified as: {classified_creature}')
+    """
 
+import random
+import math
+import matplotlib.pyplot as plt
+class FlightPath(object):
+    
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.stats = {"error_details": []}
+        self.data = {}
+        self.flight_path = {}
+    
+    def set_obstacles(self,obstacleList):
+        self.data['obstacles'] = obstacleList
+
+    def set_path(self, n_steps=10):
+        flightpath = np.random.random_integers(low=-10,high=10,size=n_steps)
+        self.data['path'] = flightpath.tolist()
+        return flightpath
+
+    def calc_distance(position1:tuple, position2:tuple):
+        x1, y1 = position1
+        x2, y2 = position2
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+    def showPath(self):
+        obs = self.data['obstacles']
+        path = self.data['path']
+        return plt.scatter(path[0],path[1])
+
+
+
+    def simulate_flight_path(self,obstacles, bird_position, flight_distance):
+        
+
+        while True:
+            # Randomly generate a direction and a distance
+            direction = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+            distance = random.uniform(0, flight_distance)
+
+            # Calculate the new bird position
+            new_bird_position = (
+                bird_position[0] + direction[0] * distance,
+                bird_position[1] + direction[1] * distance
+            )
+
+            # Check if the bird collides with any obstacles
+            for obstacle in obstacles:
+                print(obstacle)
+                if self.calc_distance(new_bird_position, obstacle) < 2:
+                    
+                    return self.flight_path
+
+            # Add the new position to the flight path
+            self.flight_path.append(new_bird_position)
+
+            # Update the bird's position
+            bird_position = new_bird_position
+            
+
+    def run_simulation(self, bird_position, flight_distance):
+        flight_distance = flight_distance  # Adjust this value to change the flight distance per step
+        flight_path = self.simulate_flight_path(self.data['obstacles'], bird_position, flight_distance)
+
+        print(f"The bird's flight path is: {flight_path}") 
