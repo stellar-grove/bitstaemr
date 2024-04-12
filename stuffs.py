@@ -3,7 +3,8 @@ import os
 
 # ------ Begin Folders ------ #
 DATA_FOLDER = "C:/stellar-grove/tara/data/"
-DATA_FOLDER_SONGROVE = "C:/stellar-grove/tara/SongroveBotanicals/data/"
+DATA_FOLDER_SONGROVE = f"C:/stellar-grove/tara/SongroveBotanicals/data/"
+
 
 
 # ------ Begin Constants ----- #
