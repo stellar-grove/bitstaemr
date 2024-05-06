@@ -55,6 +55,23 @@ def listDictionaryToDataFrame(listDictionary:list):
         df_final = pd.concat([df_final,df_interim],ignore_index = True)
     return df_final
 
+def get_stones(key_set:str=None):
+    stone_dict = {}
+    stones = os.getenv('StellarGrove').split(';')
+    for entry in os.getenv('StellarGrove').split(';'):
+
+        if ':' in entry:
+            if 'stellar' not in entry:
+                key, value = entry.split(':')
+                stone_dict[key] = value
+        
+    if key_set != None:
+        stone_dict = stone_dict[key_set]
+    
+        
+    return stone_dict
+
+
 def get_llaves(key_set=None):
     llaves = {}
     computerName = os.environ["COMPUTERNAME"]
