@@ -60,13 +60,6 @@ def get_llaves(key_set=None):
     computerName = os.environ["COMPUTERNAME"]
     userName = os.environ["USERNAME"]
     server={"name":f'{computerName}\SQLEXPRESS'}
-
-    stones={"quandl":"XWQXAFtixVtS7MX2yai6",
-            "fred":"8df23e5f253abef270e958023590041b",
-            "alphav":"A43QXKR43WZJ10VV",
-            "mint":["dkorpon15@gmail.com","PennyWise50!"]
-            }
-
     workingDirectory={
                     "bitstaemr":"C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/"
                     ,"dkorpon":"C:/Users/DanielKorpon/Stellar Grove/dkorpon - Documents/"
@@ -178,13 +171,10 @@ def get_llaves(key_set=None):
                 
             }
 
-
-
-
 # ------ Write dictionaries to llaves.                
     llaves["computerName"] = computerName
     llaves["server"] = server
-    llaves["stones"] = stones
+    llaves["stones"] = 'stones'
     llaves["workingDirectory"] = workingDirectory
     llaves["cream"] = cream
     llaves["dataSources"] = dataSources
