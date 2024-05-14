@@ -17,6 +17,10 @@ import time
 import os
 import bitstaemr.stuffs as stuffs
 from bitstaemr import tools
+import yfinance as yf
+
+
+
 computerName = os.environ['COMPUTERNAME']
 DB = {'servername': f'{computerName}\SQLEXPRESS' ,
       'database': 'fudge',
@@ -78,32 +82,59 @@ class AlphaVantage(object):
             dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
             dfSrc = dfSrc.replace('None',0)
         
-'''
-for tkr in lstTkrs:
-    symbol = tkr
-    url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={llave}'
-    #print(url)
-    r = requests.get(url)
-    data = r.json()
-    if len(data) > 0:
-        ts = data['quarterlyReports']
-        dfSrc = pd.DataFrame().from_dict(ts)
-        dfSrc['fiscalDateEnding'] = pd.to_datetime(dfSrc['fiscalDateEnding'])
-        dfSrc['symbol'] = symbol
-        dfSrc['frequency'] = 'quarterly'
-        dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
-        dfSrc = dfSrc.replace('None',0)
-        #dfSrc.to_csv(dataPath,header=True)
-        qry = f""" select * from {tgtSchema}.{tgtTbl} """
-        #dfDatabase = pd.read_sql(qry,cnxn)
-        #dfCsvColumns = dfDatabase.columns
-        dfCsv = pd.read_csv(dataPath)
-        dfCsv = (pd.read_csv(dataPath)).replace('None',0)
-        #dfDBCompare = dfSrc[~dfSrc['RowId'].isin(dfDatabase['RowId'])]
-        dfCsvCompare = dfSrc[~dfSrc['RowId'].isin(dfCsv['RowId'])]
-        chunk = np.floor(2100/dfSrc.shape[1]).astype(int)
-        #dfDBCompare.to_sql(tgtTbl,schema=tgtSchema,con=engine,if_exists='append',index=False, chunksize=chunk)
-        dfCsvCompare.to_csv(dataPath,mode='a',header=None)
-        time.sleep(13)
+    spyder_text = '''
+                        for tkr in lstTkrs:
+                            symbol = tkr
+                            url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={llave}'
+                            #print(url)
+                            r = requests.get(url)
+                            data = r.json()
+                            if len(data) > 0:
+                                ts = data['quarterlyReports']
+                                dfSrc = pd.DataFrame().from_dict(ts)
+                                dfSrc['fiscalDateEnding'] = pd.to_datetime(dfSrc['fiscalDateEnding'])
+                                dfSrc['symbol'] = symbol
+                                dfSrc['frequency'] = 'quarterly'
+                                dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
+                                dfSrc = dfSrc.replace('None',0)
+                                #dfSrc.to_csv(dataPath,header=True)
+                                qry = f""" select * from {tgtSchema}.{tgtTbl} """
+                                #dfDatabase = pd.read_sql(qry,cnxn)
+                                #dfCsvColumns = dfDatabase.columns
+                                dfCsv = pd.read_csv(dataPath)
+                                dfCsv = (pd.read_csv(dataPath)).replace('None',0)
+                                #dfDBCompare = dfSrc[~dfSrc['RowId'].isin(dfDatabase['RowId'])]
+                                dfCsvCompare = dfSrc[~dfSrc['RowId'].isin(dfCsv['RowId'])]
+                                chunk = np.floor(2100/dfSrc.shape[1]).astype(int)
+                                #dfDBCompare.to_sql(tgtTbl,schema=tgtSchema,con=engine,if_exists='append',index=False, chunksize=chunk)
+                                dfCsvCompare.to_csv(dataPath,mode='a',header=None)
+                                time.sleep(13)
 
-'''
+    '''
+
+class stocks(object):
+
+    def __init__(self) -> None:
+        self.config = {}
+        self.ticker = []
+        self.data = {}
+
+    def setTicker(self, ticker):
+        self.ticker = yf.Ticker(ticker)
+        return yf.Ticker(ticker)
+
+
+    def getHistory(self,ticker,time_period):
+        print(ticker, time_period, len(ticker))
+        tkr = yf.Ticker(ticker)
+        history = tkr.history(period=time_period)
+        self.data['history'] = history
+        self.data['history_meta'] = tkr.history_metadata
+        return history
+    
+    
+
+    def getOptions(self,ticker):
+        tkr = self.setTicker(ticker)
+        chain = tkr.option_chain(tkr)
+        return chain
