@@ -8,7 +8,7 @@ from num2words import num2words
 import datetime as dt
 import scipy.stats as stats
 
-
+dcmc = dists.DaCountDeMonteCarlo()
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       PERT                                                                 |
@@ -538,6 +538,7 @@ class GrokSays(object):
 import random
 import math
 import matplotlib.pyplot as plt
+
 class FlightPath(object):
     
     def __init__(self,config={}) -> None:
