@@ -138,3 +138,81 @@ class stocks(object):
         tkr = self.setTicker(ticker)
         chain = tkr.option_chain(tkr)
         return chain
+    
+
+    spydertext = '''
+
+        repo = 'C:/stellar-grove/'
+import sys;sys.path.append(repo)
+import bitstaemr.CREAM as cream
+import yfinance as yf
+
+s = cream.stocks()
+
+
+tkr = yf.Ticker("XOM")
+
+
+# get all stock info
+tkr.info
+
+# get historical market data
+hist = tkr.history(period="max")
+
+# show meta information about the history (requires history() to be called first)
+tkr.history_metadata
+
+# show actions (dividends, splits, capital gains)
+act = tkr.actions
+div = tkr.dividends
+splt = tkr.splits
+cg = tkr.capital_gains  # only for mutual funds & etfs
+
+# show share count
+full_shares = tkr.get_shares_full(start="2022-01-01", end=None)
+
+# show financials:
+# - income statement
+inc = tkr.income_stmt
+qtInc = tkr.quarterly_income_stmt
+# - balance sheet
+bal = tkr.balance_sheet
+qtBal = tkr.quarterly_balance_sheet
+# - cash flow statement
+cf = tkr.cashflow
+qtCf = tkr.quarterly_cashflow
+# see `Ticker.get_income_stmt()` for more options
+
+# show holders
+mh = tkr.major_holders
+ih = tkr.institutional_holders
+mfh = tkr.mutualfund_holders
+intx = tkr.insider_transactions
+inpur = tkr.insider_purchases
+inroshol = tkr.insider_roster_holders
+
+# show recommendations
+rec = tkr.recommendations
+recsum = tkr.recommendations_summary
+ugdg = tkr.upgrades_downgrades
+
+# Show future and historic earnings dates, returns at most next 4 quarters and last 8 quarters by default. 
+# Note: If more are needed use tkr.get_earnings_dates(limit=XX) with increased limit argument.
+erndt = tkr.earnings_dates
+
+# show ISIN code - *experimental*
+# ISIN = International Securities Identification Number
+isin = tkr.isin
+
+# show options expirations
+opt = tkr.options
+
+# show news
+news = tkr.news
+
+# get option chain for specific expiration
+optch = tkr.option_chain('2024-05-24')
+# data available via: opt.calls, opt.puts
+
+
+'''
