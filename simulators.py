@@ -1,13 +1,14 @@
-sg_repo = "C:/stellar-grove/bitstaemr"
+sg_repo = "C:/stellar-grove/"
 import sys;sys.path.append(sg_repo)
 import pandas as pd
-#import dkUtils.tools as tools
+import bitstaemr.tools as tools
 import tara.distributions as dists
-import distributions as dists
 import numpy as np
 from num2words import num2words
 import datetime as dt
 import scipy.stats as stats
+
+dcmc = dists.DaCountDeMonteCarlo()
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       PERT                                                                 |
@@ -360,7 +361,7 @@ class biostats(object):
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 
 
-import modsim as sim
+#import modsim as sim
 class MSP(object):
 
     def __init__(self,config={}) -> None:
@@ -468,8 +469,8 @@ class MarkovPlaysTetris(object):
 
 
 # Grok Inspired  
-from Bio import SeqIO
-from Bio.SeqFeature import SeqFeature, FeatureLocation
+#from Bio import SeqIO
+#from Bio.SeqFeature import SeqFeature, FeatureLocation
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn.metrics import accuracy_score
@@ -537,6 +538,7 @@ class GrokSays(object):
 import random
 import math
 import matplotlib.pyplot as plt
+
 class FlightPath(object):
     
     def __init__(self,config={}) -> None:
@@ -563,10 +565,7 @@ class FlightPath(object):
         path = self.data['path']
         return plt.scatter(path[0],path[1])
 
-
-
     def simulate_flight_path(self,obstacles, bird_position, flight_distance):
-        
 
         while True:
             # Randomly generate a direction and a distance
@@ -592,9 +591,82 @@ class FlightPath(object):
             # Update the bird's position
             bird_position = new_bird_position
             
-
     def run_simulation(self, bird_position, flight_distance):
         flight_distance = flight_distance  # Adjust this value to change the flight distance per step
         flight_path = self.simulate_flight_path(self.data['obstacles'], bird_position, flight_distance)
 
         print(f"The bird's flight path is: {flight_path}") 
+
+class HIV(object):
+    
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.viral_load = None
+        self.data = None
+        
+    data_loc = 'C:/Users/DanielKorpon/Stellar Grove/ticondagrova - Documents/PMLSdata/'
+        
+    def generate_time(self, start, stop, size=10):
+        time = np.linspace(start,stop,size)
+        self.time = time
+
+    def generate_viral_load(self, alpha, beta, A, B, size, return_df=False):
+        self.generate_time(size)
+        viral_load = A * np.exp(-alpha * self.time) + B * np.exp(-beta * self.time)
+        self.viral_load = viral_load
+        if return_df:
+            return viral_load
+        
+    def plot_viral_load(self):
+        plt.plot(self.time, self.viral_load)
+        
+    def load_data(self, file_name):
+        data_loc = f'{self.data_loc}{file_name}'
+        data_set = np.loadtxt(data_loc,delimiter=',')
+        self.data = data_set
+
+class Bacteria(object):
+    
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.viral_load = None
+        self.data = None
+        self.w_load = None
+
+    def generate_time(self, start, stop, size=10):
+        time = np.linspace(start,stop,size)
+        self.time = time
+
+    def generate_viral_load(self, time, tau):
+        self.viral_load = 1 - np.exp(-time / tau)
+        return self.viral_load
+    
+    def W(self, time, tau, A):
+        self.w_load = A * (np.exp(-time / tau) - 1 + (time / tau))
+        return self.w_load
+    
+class TaxiCab(object):
+    
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.data = None
+
+    def taxicab(self, pointA:tuple, pointB:tuple):
+        interval = abs(pointB[0] - pointA[0]) + abs(pointB[1] - pointA[1])
+        return interval
+    
+    def trip_cost(self, start, stop, fare_rate):
+        return np.round(self.taxicab(start, stop) * fare_rate, 2)
+
+class Distance(object):
+
+    def distance(pointA:tuple, pointB:tuple=(0,0), metric='taxi'):
+
+        if metric == 'taxi':
+            interval = abs(pointB[0] - pointA[0]) + abs(pointB[1] - pointA[1])
+
+        else:
+            interval = np.sqrt((pointB[0] - pointA[0])**2 + (pointB[1] - pointA[1])**2)
+        
+        return interval
+        
