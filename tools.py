@@ -55,6 +55,10 @@ def listDictionaryToDataFrame(listDictionary:list):
         df_final = pd.concat([df_final,df_interim],ignore_index = True)
     return df_final
 
+def list_to_dict(lst):
+    return {key: value for key, value in enumerate(lst)}
+
+
 def get_stones(key_set:str=None):
     stone_dict = {}
     stones = os.getenv('StellarGrove').split(';')
