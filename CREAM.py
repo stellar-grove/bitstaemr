@@ -5,7 +5,9 @@ Created on Thu Sep  9 11:52:27 2021
 
 @author: DanielKorpon
 """
-
+repo = "C:/stellar-grove/"
+import sys;sys.path.append(repo)
+import bitstaemr.stuffs as stuffs
 import requests
 import pandas as pd
 import pyodbc as db
@@ -216,3 +218,25 @@ optch = tkr.option_chain('2024-05-24')
 
 
 '''
+
+class StockMVP(object):
+
+    def __init__(self,ticker) -> None:
+        self.ticker = ticker
+        self.config = {'dl':stuffs.folders.download}
+        self.data = {}
+    
+    def getIncomeStatement(self):
+        folder = self.config['dl']
+        file = f'{folder}{self.ticker}_income_statement_quarter.csv'
+        df = pd.read_csv(file,keep_default_na=False)
+        df = df.ffill(axis=0)
+        mask = df.astype(bool).any(axis=1)
+        df = df[mask]
+        df = df.rename(columns={"date":"Section","Unnamed: 1":"Category"})
+
+        return df.T
+
+
+
+
