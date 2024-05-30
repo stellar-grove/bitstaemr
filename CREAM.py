@@ -234,5 +234,20 @@ class StockMVP(object):
         return df.T
 
 
+    spyder_text="""
 
+period = 'quarter'
+financial = 'income_statement'
+tkr = 'NVDA'
+file_name = f'{tkr.lower()}_{financial}_{period}.csv'
+f = f'{stuffs.folders().download}{tkr.lower()}_{financial}_{period}.csv'
+dfInit = pd.read_csv(f)
+
+dfClean = dfInit.dropna(how='all')
+dfClean.loc[:,"date"] = dfClean["date"].ffill()
+dfClean.iloc[:4,0] = 'REVENUE'
+dfClean = dfClean.dropna(thresh=len(dfClean.columns)-1)
+
+
+"""
 
