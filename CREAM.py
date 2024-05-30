@@ -116,15 +116,14 @@ class AlphaVantage(object):
 
 class stocks(object):
 
-    def __init__(self) -> None:
+    def __init__(self, ticker) -> None:
         self.config = {}
-        self.ticker = []
+        self.ticker = yf.Ticker(ticker)
         self.data = {}
 
     def setTicker(self, ticker):
         self.ticker = yf.Ticker(ticker)
         return yf.Ticker(ticker)
-
 
     def getHistory(self,ticker,time_period):
         print(ticker, time_period, len(ticker))
@@ -134,13 +133,10 @@ class stocks(object):
         self.data['history_meta'] = tkr.history_metadata
         return history
     
-    
-
     def getOptions(self,ticker):
         tkr = self.setTicker(ticker)
         chain = tkr.option_chain(tkr)
         return chain
-    
 
     spydertext = '''
 
