@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Pyton file for tools that we use in all of our programs.  The idea is to call this file with from dkUtils import tools
+Python file for tools that we use in all of our programs.  The idea is to call this file with from bitstaemr import tools
 then run the functions we need run.
 """     
 
@@ -15,13 +15,10 @@ import math
 # ------ Begin Constants ----- #
 peep = os.environ["USERNAME"]
 homeD = f'{os.environ["HOMEDRIVE"]}{os.environ["HOMEPATH"]}'.replace('\\','/')
-
 SGWD = f'{homeD}/Stellar Grove/'
 bitsWD = f'{SGWD}/bitstaemr - Documents/'
 korpWD = f'{SGWD}/dkorpon - Documents/'
 taraWD = f'{SGWD}/ticondagrova - Documents/'
-
-
 
 # ------  Begin Functions -------------------
 
@@ -55,6 +52,9 @@ def listDictionaryToDataFrame(listDictionary:list):
         df_final = pd.concat([df_final,df_interim],ignore_index = True)
     return df_final
 
+def list_to_dict(lst):
+    return {key: value for key, value in enumerate(lst)}
+
 def get_stones(key_set:str=None):
     stone_dict = {}
     stones = os.getenv('StellarGrove').split(';')
@@ -71,7 +71,6 @@ def get_stones(key_set:str=None):
         
     return stone_dict
 
-
 def get_llaves(key_set=None):
     llaves = {}
     computerName = os.environ["COMPUTERNAME"]
@@ -86,7 +85,9 @@ def get_llaves(key_set=None):
     dataBases = {'DB':{"serverName":server,
                        "driver":{"sql":'driver=SQL Server Native Client 11.0'}},
                 }
+    
     udemy = "Development/Udemy/"
+    
     dataSources={
                     "Udemy":{
                             "computerVision":f"{udemy}Computer-Vision-with-Python/DATA/",
@@ -99,7 +100,6 @@ def get_llaves(key_set=None):
 
     quandl = {"stuff":{"llave":'XWQXAFtixVtS7MX2yai6',}
             }
-
     
     columns = ['TxId','TxSource','TxDate','PostDate','TxDescription','TxCategory','TxSubCategory','TxFriendlyName'
                 ,'TxAmount','DebitAmount','CreditAmount','isDebit','isCredit','SourceType','TxNotes']

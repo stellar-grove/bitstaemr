@@ -5,7 +5,9 @@ Created on Thu Sep  9 11:52:27 2021
 
 @author: DanielKorpon
 """
-
+repo = "C:/stellar-grove/"
+import sys;sys.path.append(repo)
+import bitstaemr.stuffs as stuffs
 import requests
 import pandas as pd
 import pyodbc as db
@@ -114,15 +116,14 @@ class AlphaVantage(object):
 
 class stocks(object):
 
-    def __init__(self) -> None:
+    def __init__(self, ticker) -> None:
         self.config = {}
-        self.ticker = []
+        self.ticker = yf.Ticker(ticker)
         self.data = {}
 
     def setTicker(self, ticker):
         self.ticker = yf.Ticker(ticker)
         return yf.Ticker(ticker)
-
 
     def getHistory(self,ticker,time_period):
         print(ticker, time_period, len(ticker))
@@ -132,9 +133,121 @@ class stocks(object):
         self.data['history_meta'] = tkr.history_metadata
         return history
     
-    
-
     def getOptions(self,ticker):
         tkr = self.setTicker(ticker)
         chain = tkr.option_chain(tkr)
         return chain
+
+    spydertext = '''
+
+        repo = 'C:/stellar-grove/'
+import sys;sys.path.append(repo)
+import bitstaemr.CREAM as cream
+import yfinance as yf
+
+s = cream.stocks()
+
+
+tkr = yf.Ticker("XOM")
+
+
+# get all stock info
+tkr.info
+
+# get historical market data
+hist = tkr.history(period="max")
+
+# show meta information about the history (requires history() to be called first)
+tkr.history_metadata
+
+# show actions (dividends, splits, capital gains)
+act = tkr.actions
+div = tkr.dividends
+splt = tkr.splits
+cg = tkr.capital_gains  # only for mutual funds & etfs
+
+# show share count
+full_shares = tkr.get_shares_full(start="2022-01-01", end=None)
+
+# show financials:
+# - income statement
+inc = tkr.income_stmt
+qtInc = tkr.quarterly_income_stmt
+# - balance sheet
+bal = tkr.balance_sheet
+qtBal = tkr.quarterly_balance_sheet
+# - cash flow statement
+cf = tkr.cashflow
+qtCf = tkr.quarterly_cashflow
+# see `Ticker.get_income_stmt()` for more options
+
+# show holders
+mh = tkr.major_holders
+ih = tkr.institutional_holders
+mfh = tkr.mutualfund_holders
+intx = tkr.insider_transactions
+inpur = tkr.insider_purchases
+inroshol = tkr.insider_roster_holders
+
+# show recommendations
+rec = tkr.recommendations
+recsum = tkr.recommendations_summary
+ugdg = tkr.upgrades_downgrades
+
+# Show future and historic earnings dates, returns at most next 4 quarters and last 8 quarters by default. 
+# Note: If more are needed use tkr.get_earnings_dates(limit=XX) with increased limit argument.
+erndt = tkr.earnings_dates
+
+# show ISIN code - *experimental*
+# ISIN = International Securities Identification Number
+isin = tkr.isin
+
+# show options expirations
+opt = tkr.options
+
+# show news
+news = tkr.news
+
+# get option chain for specific expiration
+optch = tkr.option_chain('2024-05-24')
+# data available via: opt.calls, opt.puts
+
+
+'''
+
+class StockMVP(object):
+
+    def __init__(self,ticker) -> None:
+        self.ticker = ticker
+        self.config = {'dl':stuffs.folders.download}
+        self.data = {}
+    
+    def getIncomeStatement(self):
+        folder = self.config['dl']
+        file = f'{folder}{self.ticker}_income_statement_quarter.csv'
+        df = pd.read_csv(file,keep_default_na=False)
+        df = df.ffill(axis=0)
+        mask = df.astype(bool).any(axis=1)
+        df = df[mask]
+        df = df.rename(columns={"date":"Section","Unnamed: 1":"Category"})
+
+        return df.T
+
+
+    spyder_text="""
+
+period = 'quarter'
+financial = 'income_statement'
+tkr = 'NVDA'
+file_name = f'{tkr.lower()}_{financial}_{period}.csv'
+f = f'{stuffs.folders().download}{tkr.lower()}_{financial}_{period}.csv'
+dfInit = pd.read_csv(f)
+
+dfClean = dfInit.dropna(how='all')
+dfClean.loc[:,"date"] = dfClean["date"].ffill()
+dfClean.iloc[:4,0] = 'REVENUE'
+dfClean = dfClean.dropna(thresh=len(dfClean.columns)-1)
+
+
+"""
+

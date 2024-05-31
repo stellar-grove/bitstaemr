@@ -12,7 +12,7 @@ class folders(object):
     SGWD = f'{homeD}/Stellar Grove/'
     bitsWD = f'{SGWD}bitstaemr - Documents/'
     taraWD = f'{SGWD}ticondagrova - Documents/'
-
+    download = f'C:/Users/{peep}/Downloads/'
     kaggleWD = f'{taraWD}Kaggle/'
     server = f'{robot}\SQLEXPRESS'
     sniffnet = 'sniffnet.database.windows.net'
