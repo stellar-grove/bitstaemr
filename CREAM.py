@@ -20,6 +20,7 @@ import os
 import bitstaemr.stuffs as stuffs
 from bitstaemr import tools
 import yfinance as yf
+import datetime as dt
 
 
 
@@ -39,23 +40,78 @@ dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/
 
 
 
-dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/' + DB['database'] + '/' + DB['tgtSchema'] + '/' + DB['tgtTbl'] + '.csv'
+dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/{DB['database']}/{DB['tgtSchema']}/{DB['tgtTbl']}.csv'
 #sqlcon = create_engine('mssql://' + servername + '/' + dbname + '?trusted_connection=yes')
-engine = sqlalchemy.create_engine('mssql+pyodbc://' + DB['servername'] + '/' + DB['database'] + "?" + DB['driver'],echo=True)
+engine = sqlalchemy.create_engine(f'mssql+pyodbc://{DB['servername']}/{DB['database']}?{DB['driver']},echo=True')
 tgtTbl = DB['tgtTbl']
 tgtSchema = DB['tgtSchema']
 
 
 class AlphaVantage(object):
 
-    def __init__(self) -> None:
-        self.config = {}
+    def __init__(self, llave) -> None:
+        self.llave = llave
         self.ticker = []
         self.data = {}
 
-
+# - Constants -------------------------------------------------------
     llave = tools.get_stones('AlphaVantage')
-    function = 'BALANCE_SHEET'
+
+# - Financials ------------------------------------------------------
+    def BALANCE_SHEET(self,ticker):
+        url = f'https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol={ticker}&apikey={self.llave}'
+        r = requests.get(url).json()
+        df_qtrly = pd.DataFrame().from_dict(r['quarterlyReports'])
+        df_annual = pd.DataFrame().from_dict(r['annualReports'])
+        return (df_qtrly, df_annual)
+    
+    def INCOME_STATEMENT(self,ticker):
+        url = f'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={ticker}&apikey={self.llave}'
+        r = requests.get(url).json()
+        df_qtrly = pd.DataFrame().from_dict(r['quarterlyReports'])
+        df_annual = pd.DataFrame().from_dict(r['annualReports'])
+        return (df_qtrly, df_annual)
+
+    def CASH_FLOW(self,ticker):
+        url = f'https://www.alphavantage.co/query?function=CASH_FLOW&symbol={ticker}&apikey={self.llave}'
+        r = requests.get(url).json()
+        df_qtrly = pd.DataFrame().from_dict(r['quarterlyReports'])
+        df_annual = pd.DataFrame().from_dict(r['annualReports'])
+        return (df_qtrly, df_annual)
+
+    def EARNINGS(self,ticker):
+        url = f'https://www.alphavantage.co/query?function=EARNINGS&symbol={ticker}&apikey={self.llave}'
+        r = requests.get(url).json()
+        df_qtrly = pd.DataFrame().from_dict(r['quarterlyEarnings'])
+        df_annual = pd.DataFrame().from_dict(r['annualEarnings'])
+        return (df_qtrly, df_annual)
+
+    def OVERVIEW(self,ticker):
+        url = f'https://www.alphavantage.co/query?function=OVERVIEW&symbol={ticker}&apikey={self.llave}'
+        r = requests.get(url).json()
+        df_qtrly = pd.DataFrame().from_dict(r,orient='index')
+        return (df_qtrly)
+    
+    def DIVIDENDS(self,ticker):
+        url = f'https://www.alphavantage.co/query?function=DIVIDENDS&symbol={ticker}&apikey={self.llave}'
+        df = pd.DataFrame(requests.get(url).json()['data'])
+        return (df)
+
+# - Prices ------------------------------------------------------
+    def INTRADAY(self,ticker, time_period):
+        if time_period in ['1min', '5min', '15min', '30min', '60min']:
+            url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={ticker}&interval={time_period}&outputsize=full&apikey={self.llave}'
+            r = requests.get(url).json()
+            key = f'Time Series ({time_period})'
+            df = pd.DataFrame.from_dict(r[key],orient="index").reset_index()
+            df.columns = ['datetime','open','high','low','close','volume']
+            df.loc[:,'datetime'] = pd.to_datetime(df.loc[:,'datetime'])
+            return df
+
+    def DAILY(self,ticker,datatype='csv',outputsize:str='compact'):
+        url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={ticker}&outputsize=full&apikey={self.llave}'
+        r = requests.get(url).json()
+        return r
 
     def set_ticker(self, ticker):
         if type(ticker) == list:
@@ -125,18 +181,37 @@ class stocks(object):
         self.ticker = yf.Ticker(ticker)
         return yf.Ticker(ticker)
 
-    def getHistory(self,ticker,time_period):
-        print(ticker, time_period, len(ticker))
-        tkr = yf.Ticker(ticker)
-        history = tkr.history(period=time_period)
+    def getHistory(self,time_period):
+        history = self.ticker.history(period=time_period)
         self.data['history'] = history
-        self.data['history_meta'] = tkr.history_metadata
+        self.data['history_meta'] = self.ticker.history_metadata
         return history
     
     def getOptions(self,ticker):
         tkr = self.setTicker(ticker)
         chain = tkr.option_chain(tkr)
         return chain
+
+    def getIncomeStatement(self):
+        inc = self.ticker.income_stmt.T.reset_index()
+        qtInc = self.ticker.quarterly_income_stmt.T.reset_index()
+        return (inc, qtInc)
+
+    def getBalanceSheet(self):
+        bal = self.ticker.balance_sheet
+        qtBal = self.ticker.quarterly_balance_sheet
+        return (bal, qtBal)
+
+    def getCashFlow(self):
+        cf = self.ticker.cashflow
+        qtCf = self.ticker.quarterly_cashflow
+        return (cf, qtCf)
+    
+    def getCorporateActions(self):
+        act = self.ticker.actions
+        div = self.ticker.dividends
+        splits = self.ticker.splits
+        return (act, div, splits)
 
     spydertext = '''
 
