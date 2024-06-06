@@ -37,14 +37,16 @@ DB = {'servername': f'{computerName}\SQLEXPRESS' ,
 dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/fudge/BalanceSheet.csv'
 
 
-
-
-
-dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/{DB['database']}/{DB['tgtSchema']}/{DB['tgtTbl']}.csv'
-#sqlcon = create_engine('mssql://' + servername + '/' + dbname + '?trusted_connection=yes')
-engine = sqlalchemy.create_engine(f'mssql+pyodbc://{DB['servername']}/{DB['database']}?{DB['driver']},echo=True')
+database = DB['database']
+server = DB['servername']
+driver = DB['driver']
 tgtTbl = DB['tgtTbl']
 tgtSchema = DB['tgtSchema']
+
+dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/{database}/{tgtSchema}/{tgtTbl}.csv'
+#sqlcon = create_engine('mssql://' + servername + '/' + dbname + '?trusted_connection=yes')
+engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server}/{database}?{driver},echo=True')
+
 
 
 class AlphaVantage(object):
