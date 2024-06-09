@@ -1,8 +1,9 @@
 import os
-
 import openai
+import sys; sys.path.append('C:/stellar-grove/')
+import bitstaemr.tools as tools
 
-openai.api_key = os.environ["OPENAI_API_KEY"]
+openai.api_key = tools.get_stones("OPENAI_API_KEY")
 
 class TestGenerator:
     def __init__(self, topic, num_possible_answers, num_questions):

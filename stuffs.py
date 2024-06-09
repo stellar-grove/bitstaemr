@@ -36,7 +36,35 @@ class constants(object):
     "boltzman_constant":1.389649e-23
 }
 
- 
+class lists(object):
+    class MLB(object):
+        list_meta = ['awards',
+                     'baseballStats',
+                      'eventTypes',
+                      'gameStatus',
+                      'gameTypes',
+                      'hitTrajectories',
+                      'jobTypes',
+                      'languages',
+                      'leagueLeaderTypes',
+                      'logicalEvents',
+                      'metrics',
+                      'pitchCodes',
+                      'pitchTypes',
+                      'platforms',
+                      'positions',
+                      'reviewReasons',
+                      'rosterTypes',
+                      'scheduleEventTypes',
+                      'situationCodes',
+                      'sky',
+                      'standingsTypes',
+                      'statGroups',
+                      'statTypes'
+                      ,'windDirection'
+                      ]
+
+
 
 
 
