@@ -12,7 +12,7 @@ class folders(object):
     SGWD = f'{homeD}/Stellar Grove/'
     bitsWD = f'{SGWD}bitstaemr - Documents/'
     taraWD = f'{SGWD}ticondagrova - Documents/'
-
+    download = f'C:/Users/{peep}/Downloads/'
     kaggleWD = f'{taraWD}Kaggle/'
     server = f'{robot}\SQLEXPRESS'
     sniffnet = 'sniffnet.database.windows.net'
@@ -30,13 +30,47 @@ class folders(object):
 
 class constants(object):
     chemistry_constants = {
+    "avagadro_constant":602214076000000000000000,
+    "gas_constant":8.31446261815324,
+    "boltzman_constant":1.389649e-23
+}
+
+class lists(object):
+    class MLB(object):
+        list_meta = ['awards',
+                     'baseballStats',
+                      'eventTypes',
+                      'gameStatus',
+                      'gameTypes',
+                      'hitTrajectories',
+                      'jobTypes',
+                      'languages',
+                      'leagueLeaderTypes',
+                      'logicalEvents',
+                      'metrics',
+                      'pitchCodes',
+                      'pitchTypes',
+                      'platforms',
+                      'positions',
+                      'reviewReasons',
+                      'rosterTypes',
+                      'scheduleEventTypes',
+                      'situationCodes',
+                      'sky',
+                      'standingsTypes',
+                      'statGroups',
+                      'statTypes'
+                      ,'windDirection'
+                      ]
+
+
+=======
 
     "avagadro_constant":602214076000000000000000,
     "gas_constant":8.31446261815324,
     "boltzman_constant":1.389649e-23
 }
 
- 
 
 
 
