@@ -22,8 +22,6 @@ from bitstaemr import tools
 import yfinance as yf
 import datetime as dt
 
-
-
 computerName = os.environ['COMPUTERNAME']
 DB = {'servername': f'{computerName}\SQLEXPRESS' ,
       'database': 'fudge',
@@ -36,7 +34,6 @@ DB = {'servername': f'{computerName}\SQLEXPRESS' ,
 #cnxn = db.connect('DRIVER={SQL Server};SERVER='+DB['servername']+';DATABASE=' + DB['database'])
 dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/fudge/BalanceSheet.csv'
 
-
 database = DB['database']
 server = DB['servername']
 driver = DB['driver']
@@ -46,8 +43,6 @@ tgtSchema = DB['tgtSchema']
 dataPath = f'C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/data/mkt/{database}/{tgtSchema}/{tgtTbl}.csv'
 #sqlcon = create_engine('mssql://' + servername + '/' + dbname + '?trusted_connection=yes')
 engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server}/{database}?{driver},echo=True')
-
-
 
 class AlphaVantage(object):
 
@@ -188,7 +183,7 @@ class stocks(object):
         self.data['history'] = history
         self.data['history_meta'] = self.ticker.history_metadata
         return history
-    
+
     def getOptions(self,ticker):
         tkr = self.setTicker(ticker)
         chain = tkr.option_chain(tkr)
@@ -289,9 +284,8 @@ news = tkr.news
 optch = tkr.option_chain('2024-05-24')
 # data available via: opt.calls, opt.puts
 
-
 '''
-
+    
 class StockMVP(object):
 
     def __init__(self,ticker) -> None:
@@ -325,6 +319,4 @@ dfClean.loc[:,"date"] = dfClean["date"].ffill()
 dfClean.iloc[:4,0] = 'REVENUE'
 dfClean = dfClean.dropna(thresh=len(dfClean.columns)-1)
 
-
 """
-

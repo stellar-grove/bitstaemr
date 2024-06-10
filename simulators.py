@@ -23,6 +23,8 @@ from sklearn.metrics import (mean_squared_error,
 
 dcmc = dists.DaCountDeMonteCarlo()
 
+dcmc = dists.DaCountDeMonteCarlo()
+
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       PERT                                                                 |
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
@@ -370,6 +372,68 @@ class biostats(object):
             True
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       Modeling and Simulation Using Python                                 |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+
+
+#import modsim as sim
+class MSP(object):
+
+    def __init__(self,config={}) -> None:
+        self.config = config
+        self.stats = {"error_details": []}
+        self.data = {}
+
+    
+    def setInitialStates(lstInitialStates):
+        a = lstInitialStates[0]; b = lstInitialStates[1]
+        sm = sim.State(spotA = a,spotB = b)
+        return sm
+
+    def ItemToA(sm):
+        sm.spotA += 1
+        sm.spotB -= 1
+        
+    
+    def ItemToB(sm):
+        sm.spotA -= 1
+        sm.spotB += 1
+
+
+    def make_system(beta, gamma):
+        init = sim.State(s = 89, i = 1, r = 0)
+        init /= init.sum()
+        return sim.System(init=init, t_end=7*14,beta=beta, gamma=gamma)
+
+    def update_func(t, state, system):
+        s, i, r = state.s, state.i, state.r
+
+        infected = system.beta * i * s
+        recovered = system.gamma * i
+
+        s -= infected
+        i += infected - recovered
+        r += recovered
+
+        return sim.State(s=s, i=i, r=r)
+
+
+    def plot_results(S, I, R):
+        S.plot(style='--', label='Susceptible')
+        I.plot(style='-', label='Infected')
+        R.plot(style=':', label='Resistant')
+        sim.decorate(xlabel='Time (days)',
+                ylabel='Fraction of population')
+       
+    def run_simulation(system, update_func):
+        frame = sim.TimeFrame(columns=system.init.index)
+        frame.loc[0] = system.init
+        for t in range(0, system.t_end):
+            frame.loc[t+1] = update_func(t, frame.loc[t], system)
+        
+        return frame
+
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       Planetary Orbits                                                     |
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class planetaryorbit(object):
@@ -429,7 +493,7 @@ class GrokSays(object):
         self.config = config
         self.stats = {"error_details": []}
         self.data = {}
-    """
+    spyder_text = """
         # Load the genome sequence
         def load_genome(file_path):
             genome_seq = SeqIO.read(file_path, 'fasta')
@@ -630,6 +694,7 @@ class Distance(object):
         
         return interval
         
+
 class Baseball(object):
         def __init__(self) -> None:
             self.config = {}
@@ -785,3 +850,4 @@ class MSP(object):
     def State(**variables):
         """Contains the values of state variables."""
         return pd.Series(variables, name='state')     
+
