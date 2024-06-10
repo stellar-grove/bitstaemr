@@ -1,6 +1,6 @@
 import datetime
-
-from teacher import Teacher
+import sys; sys.path.append("C:/stellar-grove")
+from bitstaemr.talkinthai.ingredients.step2.teacher import Teacher
 
 class Exam:
     def __init__(self, student_view, answers, store_test=False, topic=""):

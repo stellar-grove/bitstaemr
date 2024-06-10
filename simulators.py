@@ -6,7 +6,22 @@ import tara.distributions as dists
 import numpy as np
 from num2words import num2words
 import datetime as dt
-import scipy.stats as stats
+from scipy.stats import (expon, 
+                         norm, 
+                         poisson,
+                         ttest_ind, 
+                         ks_2samp,
+                         poisson_means_test
+                         )
+from sklearn. preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import (mean_squared_error,
+                             mean_absolute_error)
+
+dcmc = dists.DaCountDeMonteCarlo()
 
 dcmc = dists.DaCountDeMonteCarlo()
 
@@ -466,8 +481,6 @@ class MarkovPlaysTetris(object):
         
         return np.array(samples), acceptance_ratio
 
-
-
 # Grok Inspired  
 #from Bio import SeqIO
 #from Bio.SeqFeature import SeqFeature, FeatureLocation
@@ -480,7 +493,7 @@ class GrokSays(object):
         self.config = config
         self.stats = {"error_details": []}
         self.data = {}
-    """
+    spyder_text = """
         # Load the genome sequence
         def load_genome(file_path):
             genome_seq = SeqIO.read(file_path, 'fasta')
@@ -534,6 +547,17 @@ class GrokSays(object):
         # print(f'The creature is classified as: {classified_creature}')
 
     """
+
+
+    class QuantFinance(object):
+        def __init__(self,config={}) -> None:
+            self.config = config
+            self.stats = {"error_details": []}
+            self.data = {}
+
+        def getData(self):
+            return "Pumpkin Head needs to finish this."
+
 
 import random
 import math
@@ -670,3 +694,160 @@ class Distance(object):
         
         return interval
         
+
+class Baseball(object):
+        def __init__(self) -> None:
+            self.config = {}
+            self.stats = {"error_details": []}
+            self.data = {}
+            self.system = {}
+        
+        def pitch_ball(pitcherName:str='Yoko Ono'):
+            # Look up the pitcher to determine their attributes. This requires a dictionary to be made
+            for pitch in np.arange(1,7):
+                pitch_location = np.random.randint(100)
+                if pitch_location < 60:
+                    ball_strike = 'Strike'
+                else:
+                    ball_strike = "Ball"
+                print(f"pitch Number: {pitch} had a location of {pitch_location}, which correlates to a {ball_strike}")
+            return pitch_location
+
+class Marketing(object):
+
+    class ABTesting(object):
+        def __init__(self, distribution:str, values:list, size:int) -> None:
+            self.distribution = distribution
+            self.values = values
+            self.size = size
+            self.data = {}
+            self.stats = {}
+
+        def createData(self):
+
+            if self.distribution.lower() in ["exponential", "expon","exp"]:
+                
+                # Exponential distribution parameters
+                lam1 = self.values[0]
+                lam2 = self.values[1]
+
+                # Generate exponentially distributed samples
+                np.random.seed(0)
+                control_data = norm.rvs(scale=1/lam1, size=self.size)
+                treatment_data = expon.rvs(scale=1/lam2, size=self.size)
+                self.data['control'] = control_data
+                self.data['treatment'] = treatment_data
+
+            if self.distribution.lower() in ["normal", "norm", "n"]:
+                # Exponential distribution parameters
+                mu1 = self.values[0][0]; sigma1 = self.values[0][1]
+                mu2 = self.values[1][0]; sigma2 = self.values[1][1]
+
+                # Generate exponentially distributed samples
+                np.random.seed(0)
+                self.data['control'] = norm.rvs(loc=mu1, scale=sigma1, size=self.size)
+                self.data['treatment'] = expon.rvs(loc = mu2, scale=sigma2, size=self.size)
+
+            if self.distribution.lower() in ["poisson", "poison", "pson", "pois"]:
+                self.data['control'] = poisson.rvs(self.values[0], size=self.size)
+                self.data['treatment'] = poisson.rvs(self.values[1], size=self.size)
+                
+            return (self.data['control'], self.data['treatment'])
+
+        def performTest(self, control_data, treatment_data):
+            
+            if self.distribution.lower() in ["exponential", "expon","exp"]: 
+                # Perform statistical tests
+                self.stats["stat"], self.stats["p_value"] = ks_2samp(control_data, treatment_data)
+
+            if self.distribution.lower() in ["poisson", "poison", "pson", "pois"]:
+                # Perform statistical tests
+                stat, p_value = poisson_means_test(self.values[0], self.size, self.values[1], self.size)
+                self.stats['stat'] = stat
+                self.stats['p_value'] = p_value
+
+            if self.distribution.lower() in ["normal", "norm", "n"]:
+                # Perform statistical tests
+                stat, p_value = ttest_ind(self.data['control'], self.data['treatment'])
+                self.stats['stat'] = stat
+                self.stats['p_value'] = p_value
+            
+
+            return (stat, p_value)
+
+        def run(self, print_stats:bool=False):
+            self.performTest(self.createData()[0], self.createData()[1])
+            if print_stats:
+                return self.stats
+
+        def plotHistograms(self,control_data,treatment_data):
+            plt.hist(control_data, bins=30, alpha=0.5, label='Control')
+            plt.hist(treatment_data, bins=30, alpha=0.5, label='Treatment')
+            plt.xlabel('Time (seconds)')
+            plt.ylabel('Frequency')
+            plt.title('A/B Testing Results')
+
+# # Visualize the results
+
+# plt.xlabel('Time (seconds)')
+# plt.ylabel('Frequency')
+# plt.title('A/B Testing Results')
+# plt.legend()
+# plt.show()
+
+
+class MSP(object):
+    SimpleNamespace = type(sys.implementation)
+    class SettableNamespace(SimpleNamespace):
+        """Contains a collection of parameters.
+
+        Used to make a System object.
+
+        Takes keyword arguments and stores them as attributes.
+        """
+        def __init__(self, namespace=None, **kwargs):
+            super().__init__()
+            if namespace:
+                self.__dict__.update(namespace.__dict__)
+            self.__dict__.update(kwargs)
+
+        def get(self, name, default=None):
+            """Look up a variable.
+
+            name: string varname
+            default: value returned if `name` is not present
+            """
+            try:
+                return self.__getattribute__(name, default)
+            except AttributeError:
+                return default
+
+        def set(self, **variables):
+            """Make a copy and update the given variables.
+
+            returns: Params
+            """
+            new = copy(self)
+            new.__dict__.update(variables)
+            return new
+
+    class System(SettableNamespace):
+        """Contains system parameters and their values.
+
+        Takes keyword arguments and stores them as attributes.
+        """
+        pass
+
+
+    class Params(SettableNamespace):
+        """Contains system parameters and their values.
+
+        Takes keyword arguments and stores them as attributes.
+        """
+        pass
+
+
+    def State(**variables):
+        """Contains the values of state variables."""
+        return pd.Series(variables, name='state')     
+

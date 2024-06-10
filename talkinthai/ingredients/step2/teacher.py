@@ -1,6 +1,6 @@
 import logging
-
-from test_creator import TestGenerator
+import sys; sys.path.append("C:/stellar-grove")
+from bitstaemr.talkinthai.ingredients.step2.test_creator import TestGenerator
 
 
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
