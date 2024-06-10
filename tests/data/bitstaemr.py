@@ -1,0 +1,1 @@
+TEST_STONES = {'tester_bester':'NRLHDAQN'}

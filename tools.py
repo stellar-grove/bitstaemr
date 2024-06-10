@@ -66,10 +66,7 @@ def get_stones(key_set:str=None):
                 stone_dict[key] = value
         
     if key_set != None:
-
         stone_dict = stone_dict[key_set]    
-    return stone_dict
-        stone_dict = stone_dict[key_set]
     return stone_dict
 
 def get_llaves(key_set=None):
