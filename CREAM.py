@@ -21,6 +21,7 @@ import bitstaemr.stuffs as stuffs
 from bitstaemr import tools
 import yfinance as yf
 import datetime as dt
+import scipy.stats
 
 computerName = os.environ['COMPUTERNAME']
 DB = {'servername': f'{computerName}\SQLEXPRESS' ,
@@ -320,3 +321,69 @@ dfClean.iloc[:4,0] = 'REVENUE'
 dfClean = dfClean.dropna(thresh=len(dfClean.columns)-1)
 
 """
+
+class MCMC(object):
+
+    def __init__(self,risk_free:float=0) -> None:
+        self.data = {}
+        self.ratios = {}
+        self.stats = {}
+
+    def calc_sharpe_ratio(self, data, risk_free_rate = 0):
+        mean_return = data["Daily Return"].mean()
+        std = data["Daily Return"].std()
+        sharpe_ratio = (mean_return-risk_free_rate) / std
+        self.ratios = {'sharpe':sharpe_ratio}
+        return sharpe_ratio
+    
+    def calc_sortino_ratio(self, data, target, risk_free_rate=0):
+        mean_return = data["Daily Return"].mean()
+        downside = data[data["Daily Return"] < target]["Daily Return"]
+        std = downside.std()
+        sortino_ratio = (mean_return-risk_free_rate) / std
+        self.ratios = {'sortino':sortino_ratio}
+        return sortino_ratio
+    
+    def compute_prob_sharpe_ratio(self, data, benchmark=0):
+        sr = self.calc_sharpe_ratio(data, 0)
+        skew = scipy.stats.skew(data["Daily Return"])
+        # Use fisher kurtosis
+        kurtosis = scipy.stats.kurtosis(data["Daily Return"], fisher=True)  
+        n = len(data)
+        std = ( (1 / (n-1)) * (1 + 0.5 * sr**2 - skew * sr + (kurtosis / 4) * sr**2))**0.5
+        ratio = (sr - benchmark) / std
+        prob_sharpe_ratio = scipy.stats.norm.cdf(ratio)
+        self.ratios["psr"] = prob_sharpe_ratio
+        return prob_sharpe_ratio
+    
+    def generate_random_weights(size):
+        wts = np.random.random(size)
+        return wts / np.sum(wts)
+    
+    def calc_returns(weights,log_rets):
+        return np.sum(log_rets.mean()*weights) * 252 #Annualized Returns
+
+    def calc_log_returns(self, data):
+        return np.log(data/data.shift(1))
+        
+    def calc_log_returns_cov_matrix(self,log_rets):
+        return log_rets.cov()
+
+    def calculate_volatility(self, weights,log_rets_cov_mat):
+        annualized_cov = np.dot(log_rets_cov_mat*252,weights)
+        vol = np.dot(weights.transpose(),annualized_cov)
+        self.stats["volatility"] = np.sqrt(vol)
+        return np.sqrt(vol)
+
+    def run_sim(self, size, data):
+        # data: this should be the log returns.
+
+        mc_portfolio_returns = []
+        mc_portfolio_vol = []
+        mc_weights = []
+        for sim in range(size):
+            # This may take awhile!
+            weights = self.generate_random_weights(N=4)
+            mc_weights.append(weights)
+            mc_portfolio_returns.append(self.calc_returns(weights,data))
+            mc_portfolio_vol.append(self.cal_volatility(weights,data.cov()))

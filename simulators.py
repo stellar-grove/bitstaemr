@@ -786,13 +786,13 @@ class Marketing(object):
             plt.ylabel('Frequency')
             plt.title('A/B Testing Results')
 
-# # Visualize the results
+        # # Visualize the results
 
-# plt.xlabel('Time (seconds)')
-# plt.ylabel('Frequency')
-# plt.title('A/B Testing Results')
-# plt.legend()
-# plt.show()
+        # plt.xlabel('Time (seconds)')
+        # plt.ylabel('Frequency')
+        # plt.title('A/B Testing Results')
+        # plt.legend()
+        # plt.show()
 
 
 class MSP(object):
@@ -837,14 +837,12 @@ class MSP(object):
         """
         pass
 
-
     class Params(SettableNamespace):
         """Contains system parameters and their values.
 
         Takes keyword arguments and stores them as attributes.
         """
         pass
-
 
     def State(**variables):
         """Contains the values of state variables."""
