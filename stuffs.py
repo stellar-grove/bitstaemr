@@ -62,16 +62,3 @@ class lists(object):
                       'statTypes'
                       ,'windDirection'
                       ]
-
-
-=======
-
-    "avagadro_constant":602214076000000000000000,
-    "gas_constant":8.31446261815324,
-    "boltzman_constant":1.389649e-23
-}
-
-
-
-
-

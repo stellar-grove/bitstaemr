@@ -13,14 +13,14 @@ import pandas as pd
 import pyodbc as db
 import pandas.io.json as json
 import sqlalchemy
-from sqlalchemy import types
 import numpy as np
-import time
 import os
 import bitstaemr.stuffs as stuffs
 from bitstaemr import tools
 import yfinance as yf
 import datetime as dt
+import scipy.stats
+import matplotlib.pyplot as plt
 
 computerName = os.environ['COMPUTERNAME']
 DB = {'servername': f'{computerName}\SQLEXPRESS' ,
@@ -318,5 +318,155 @@ dfClean = dfInit.dropna(how='all')
 dfClean.loc[:,"date"] = dfClean["date"].ffill()
 dfClean.iloc[:4,0] = 'REVENUE'
 dfClean = dfClean.dropna(thresh=len(dfClean.columns)-1)
+
+"""
+
+class MCMC(object):
+    
+    def __init__(self,
+                 holdings:list=["GE","AMZN","AAPL","SPY"],
+                 risk_free:float=0) -> None:
+        self.data = {"holdings":holdings}
+        self.ratios = {}
+        self.stats = {'risk_free':risk_free,
+                      }
+
+    def gatherData(self, time_pd:str="1y",source:str="yFinance",file_path:str=None):
+        # Using yFinance
+        if source.lower() in ["yf", "yfin", "yfinance", "yahoo", "yhoo"]:
+            lst_df = []
+            for ticker in self.data["holdings"]:
+                lst_df.append(stocks(ticker).getHistory(time_pd))
+            columns = ['Close'] * len(lst_df)
+            data = pd.concat([df[column] for df, column in zip(lst_df, columns)], axis=1)
+            data.columns = self.data['holdings']
+        # Pulling from a file
+        if source.lower() in ['file', 'csv', 'txt']:
+            if file_path == None:
+                file_path = "C:/stellar-grove/"
+                data = file_path
+
+
+        return data
+
+    def calc_sharpe_ratio(self, data, risk_free_rate = 0):
+        mean_return = data["Daily Return"].mean()
+        std = data["Daily Return"].std()
+        sharpe_ratio = (mean_return-risk_free_rate) / std
+        self.ratios = {'sharpe':sharpe_ratio}
+        return sharpe_ratio
+    
+    def calc_sortino_ratio(self, data, target, risk_free_rate=0):
+        mean_return = data["Daily Return"].mean()
+        downside = data[data["Daily Return"] < target]["Daily Return"]
+        std = downside.std()
+        sortino_ratio = (mean_return-risk_free_rate) / std
+        self.ratios = {'sortino':sortino_ratio}
+        return sortino_ratio
+    
+    def compute_prob_sharpe_ratio(self, data, benchmark=0):
+        sr = self.calc_sharpe_ratio(data, 0)
+        skew = scipy.stats.skew(data["Daily Return"])
+        # Use fisher kurtosis
+        kurtosis = scipy.stats.kurtosis(data["Daily Return"], fisher=True)  
+        n = len(data)
+        std = ( (1 / (n-1)) * (1 + 0.5 * sr**2 - skew * sr + (kurtosis / 4) * sr**2))**0.5
+        ratio = (sr - benchmark) / std
+        prob_sharpe_ratio = scipy.stats.norm.cdf(ratio)
+        self.ratios["psr"] = prob_sharpe_ratio
+        return prob_sharpe_ratio
+    
+    def generate_random_weights(self, size):
+        wts = np.random.random(size)
+        return wts / np.sum(wts)
+    
+    def calc_returns(self, weights ,log_rets):
+        return np.sum(log_rets.mean()*weights) * 252 #Annualized Returns
+
+    def calc_log_returns(self, data):
+        return np.log(data/data.shift(1))
+        
+    def calc_log_returns_cov_matrix(self,log_rets):
+        return log_rets.cov()
+
+    def calc_volatility(self, weights,log_rets_cov_mat):
+        annualized_cov = np.dot(log_rets_cov_mat*252,weights)
+        vol = np.dot(weights.transpose(),annualized_cov)
+        self.stats["volatility"] = np.sqrt(vol)
+        return np.sqrt(vol)
+
+    def run_weight_opt(self, size, log_returns, print_stats:bool=False):
+        # data: this should be the log returns.
+
+        mc_portfolio_returns = []
+        mc_portfolio_vol = []
+        mc_weights = []
+        N = len(self.data['holdings'])
+        for sim in range(size):
+            # This may take awhile!
+            weights = self.generate_random_weights(size = N)
+            mc_weights.append(weights)
+            mc_portfolio_returns.append(self.calc_returns(weights,log_returns))
+            mc_portfolio_vol.append(self.calc_volatility(weights,log_returns.cov()))
+        self.data["mc_weights"] = mc_weights
+        self.data["mc_vol"] = mc_portfolio_vol
+        self.data['mc_returns'] = mc_portfolio_returns
+        self.data['mc_sharpe'] = np.array(mc_portfolio_returns) / np.array(mc_portfolio_vol)
+        if print_stats:
+            stats = {
+
+                'sharpe':np.mean(self.data['mc_sharpe']),
+                'vol':np.mean(self.data['mc_vol']),
+                'return':np.mean(self.data['mc_returns'])
+
+            }
+            return stats
+
+    def plot_mcmc(self):
+        plt.figure(dpi=200, figsize=(10,5))
+        plt.scatter(self.data['mc_vol'], self.data['mc_returns'],c=self.data['mc_sharpe'])
+        plt.colorbar(label="Sharpe Ratio")
+        plt.xlabel(xlabel="Volatility")
+        plt.ylabel(ylabel="Return")
+
+
+spyder_text = """
+
+dk_repo = "C:/repo/bitstaemr";sg_repo = "C:/stellar-grove"
+import sys;sys.path.append(sg_repo)
+#sys.path.append(dk_repo)
+import os
+import numpy as np
+from tara.tests import test_ticondagrova as tara_test
+
+tara_test
+tara_test.TestDistributions().test_generateTSP()
+
+
+import bitstaemr.tools as tools
+import bitstaemr.tests.tests_bitstaemr as bits_test
+import bitstaemr.tests.data.bitstaemr as test_data
+
+test_data.TEST_STONES
+tools.get_stones('tester_bester')
+bits_test.TestTools().test_get_stones()
+
+
+
+os.getenv('StellarGrove')
+
+
+from bitstaemr.CREAM import MCMC
+
+mcmc = MCMC()
+data = mcmc.gatherData(source='yf')
+data2 = mcmc.gatherData(source="file")
+
+len(mcmc.data['holdings'])
+mcmc.generate_random_weights()
+sims = mcmc.run_sim(100, data)
+
+np.random.random(len(mcmc.data['holdings']))
+
 
 """
