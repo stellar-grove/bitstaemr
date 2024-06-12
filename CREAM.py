@@ -20,6 +20,7 @@ from bitstaemr import tools
 import yfinance as yf
 import datetime as dt
 import scipy.stats
+import matplotlib.pyplot as plt
 
 computerName = os.environ['COMPUTERNAME']
 DB = {'servername': f'{computerName}\SQLEXPRESS' ,
@@ -323,7 +324,7 @@ dfClean = dfClean.dropna(thresh=len(dfClean.columns)-1)
 class MCMC(object):
     
     def __init__(self,
-                 holdings:list=["WMT","TSLA","PLTR","NVDA","SPY"],
+                 holdings:list=["GE","AMZN","AAPL","SPY"],
                  risk_free:float=0) -> None:
         self.data = {"holdings":holdings}
         self.ratios = {}
@@ -394,7 +395,7 @@ class MCMC(object):
         self.stats["volatility"] = np.sqrt(vol)
         return np.sqrt(vol)
 
-    def run_weight_opt(self, size, log_returns):
+    def run_weight_opt(self, size, log_returns, print_stats:bool=False):
         # data: this should be the log returns.
 
         mc_portfolio_returns = []
@@ -410,6 +411,24 @@ class MCMC(object):
         self.data["mc_weights"] = mc_weights
         self.data["mc_vol"] = mc_portfolio_vol
         self.data['mc_returns'] = mc_portfolio_returns
+        self.data['mc_sharpe'] = np.array(mc_portfolio_returns) / np.array(mc_portfolio_vol)
+        if print_stats:
+            stats = {
+
+                'sharpe':np.mean(self.data['mc_sharpe']),
+                'vol':np.mean(self.data['mc_vol']),
+                'return':np.mean(self.data['mc_returns'])
+
+            }
+            return stats
+
+    def plot_mcmc(self):
+        plt.figure(dpi=200, figsize=(10,5))
+        plt.scatter(self.data['mc_vol'], self.data['mc_returns'],c=self.data['mc_sharpe'])
+        plt.colorbar(label="Sharpe Ratio")
+        plt.xlabel(xlabel="Volatility")
+        plt.ylabel(ylabel="Return")
+
 
 spyder_text = """
 
