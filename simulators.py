@@ -483,11 +483,15 @@ class MarkovPlaysTetris(object):
 # Grok Inspired  
 #from Bio import SeqIO
 #from Bio.SeqFeature import SeqFeature, FeatureLocation
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn import svm
 from sklearn.metrics import accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm
 
 class GrokSays(object):
+
+    
     def __init__(self,config={}) -> None:
         self.config = config
         self.stats = {"error_details": []}
@@ -546,6 +550,36 @@ class GrokSays(object):
         # print(f'The creature is classified as: {classified_creature}')
 
     """
+    class GenomeSequencing():
+
+        introduction = """
+                    Imagine being able to identify an animal's species just by looking at its DNA. 
+                    Sounds like something out of a sci-fi movie, right? 
+                    Well, thanks to the wonders of modern technology, this is now a reality! 
+                    In this study, we'll be using Python to develop a machine learning model 
+                    that can classify animals based on their genomic sequences.
+
+                    """
+        def __init__(self,config={}) -> None:
+            self.config = config
+            self.stats = {"error_details": []}
+            self.introduction = self.introduction
+
+        def load_sample_data(self,file_location:str=None, return_df:bool=True):
+            danimals = [
+                        {"name": "Elephant", "sequence": "ATGCATGCATGCATGC"},
+                        {"name": "Giraffe", "sequence": "TGCATGCATGCATGC"},
+                        {"name": "Lion", "sequence": "GCTGCATGCATGC"},
+                        {"name": "Tiger", "sequence": "CATGCATGCATGC"},
+                        {"name": "Bear", "sequence": "GCATGCATGCATGC"}
+                        ]
+            df_danimals = pd.DataFrame(danimals)
+            if file_location != None:
+                df_danimals.to_csv(file_location)
+            return df_danimals
+
+    
+
 
 
     class QuantFinance(object):
@@ -693,7 +727,6 @@ class Distance(object):
         
         return interval
         
-
 class Baseball(object):
         def __init__(self) -> None:
             self.config = {}
@@ -786,14 +819,13 @@ class Marketing(object):
             plt.ylabel('Frequency')
             plt.title('A/B Testing Results')
 
-# # Visualize the results
+        # # Visualize the results
 
-# plt.xlabel('Time (seconds)')
-# plt.ylabel('Frequency')
-# plt.title('A/B Testing Results')
-# plt.legend()
-# plt.show()
-
+        # plt.xlabel('Time (seconds)')
+        # plt.ylabel('Frequency')
+        # plt.title('A/B Testing Results')
+        # plt.legend()
+        # plt.show()
 
 class MSP(object):
     SimpleNamespace = type(sys.implementation)
@@ -837,7 +869,6 @@ class MSP(object):
         """
         pass
 
-
     class Params(SettableNamespace):
         """Contains system parameters and their values.
 
@@ -845,8 +876,15 @@ class MSP(object):
         """
         pass
 
-
     def State(**variables):
         """Contains the values of state variables."""
         return pd.Series(variables, name='state')     
 
+class Wildlife(object):
+
+    def __init__(self, config = {}) -> None:
+            self.config = config
+
+    def birth_process(self, lam:int=1):
+        for gen in range(10):
+            print(lam)
