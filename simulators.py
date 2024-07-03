@@ -2,6 +2,7 @@ sg_repo = "C:/stellar-grove/"
 import sys;sys.path.append(sg_repo)
 import pandas as pd
 import bitstaemr.tools as tools
+import bitstaemr.stuffs as stuffs
 import tara.distributions as dists
 import numpy as np
 from num2words import num2words
@@ -20,9 +21,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import (mean_squared_error,
                              mean_absolute_error)
-
+from sklearn.cluster import KMeans
 dcmc = dists.DaCountDeMonteCarlo()
-
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       PERT                                                                 |
@@ -578,9 +578,6 @@ class GrokSays(object):
                 df_danimals.to_csv(file_location)
             return df_danimals
 
-    
-
-
 
     class QuantFinance(object):
         def __init__(self,config={}) -> None:
@@ -663,12 +660,12 @@ class HIV(object):
         
     data_loc = 'C:/Users/DanielKorpon/Stellar Grove/ticondagrova - Documents/PMLSdata/'
         
-    def generate_time(self, start, stop, size=10):
+    def generate_time(self, start, stop, size=100):
         time = np.linspace(start,stop,size)
         self.time = time
 
     def generate_viral_load(self, alpha, beta, A, B, size, return_df=False):
-        self.generate_time(size)
+        self.generate_time(0,size)
         viral_load = A * np.exp(-alpha * self.time) + B * np.exp(-beta * self.time)
         self.viral_load = viral_load
         if return_df:
@@ -734,6 +731,7 @@ class Baseball(object):
             self.data = {}
             self.system = {}
         
+        
         def pitch_ball(pitcherName:str='Yoko Ono'):
             # Look up the pitcher to determine their attributes. This requires a dictionary to be made
             for pitch in np.arange(1,7):
@@ -745,6 +743,28 @@ class Baseball(object):
                 print(f"pitch Number: {pitch} had a location of {pitch_location}, which correlates to a {ball_strike}")
             return pitch_location
 
+
+        #----- Lists, Dictionaries and Constants -----#
+
+        pitch_types = ['fastball',
+                       'sinker',
+                       'cutter',
+                       'changeup',
+                       'split_finger',
+                       'forkball',
+                       'screwball',
+                       'curveball',
+                       'knuckle_curve',
+                       'slow_curve',
+                       'slider',
+                       'sweeper',
+                       'slurve',
+                       'knuckleball',
+                       'euphus',
+                       'other',
+                       'intentional_ball',
+                       'pitchout'
+                       ]
 class Marketing(object):
 
     class ABTesting(object):
@@ -764,7 +784,7 @@ class Marketing(object):
                 lam2 = self.values[1]
 
                 # Generate exponentially distributed samples
-                np.random.seed(0)
+                #np.random.seed(0)
                 control_data = norm.rvs(scale=1/lam1, size=self.size)
                 treatment_data = expon.rvs(scale=1/lam2, size=self.size)
                 self.data['control'] = control_data
@@ -790,7 +810,8 @@ class Marketing(object):
             
             if self.distribution.lower() in ["exponential", "expon","exp"]: 
                 # Perform statistical tests
-                self.stats["stat"], self.stats["p_value"] = ks_2samp(control_data, treatment_data)
+                stat, p_value = ks_2samp(control_data, treatment_data)
+                self.stats["stat"], self.stats["p_value"] = stat, p_value
 
             if self.distribution.lower() in ["poisson", "poison", "pson", "pois"]:
                 # Perform statistical tests
@@ -807,11 +828,6 @@ class Marketing(object):
 
             return (stat, p_value)
 
-        def run(self, print_stats:bool=False):
-            self.performTest(self.createData()[0], self.createData()[1])
-            if print_stats:
-                return self.stats
-
         def plotHistograms(self,control_data,treatment_data):
             plt.hist(control_data, bins=30, alpha=0.5, label='Control')
             plt.hist(treatment_data, bins=30, alpha=0.5, label='Treatment')
@@ -819,6 +835,12 @@ class Marketing(object):
             plt.ylabel('Frequency')
             plt.title('A/B Testing Results')
 
+        def run_simulation(self, print_stats:bool=False, plot_visual:bool=False):
+            self.performTest(self.createData()[0], self.createData()[1])
+            if print_stats:
+                return self.stats
+            if plot_visual:
+                self.plotHistograms(self.data['control'], self.data['treatment'])
         # # Visualize the results
 
         # plt.xlabel('Time (seconds)')
@@ -827,6 +849,58 @@ class Marketing(object):
         # plt.legend()
         # plt.show()
 
+    class Segmentation(object):
+        def __init__(self, config={})-> None:
+            self.data = {}
+            self.stats = {}
+            self.config = config
+            self.config['data_dir'] = stuffs.folders.DATA_FOLDER_BITS
+
+        def get_data(self, file_name:str="Online Retail.Csv",return_df:bool=False):
+            data_dir = self.config['data_dir']
+            file_path = f'{data_dir}{file_name}'
+            data = pd.read_csv(file_path)
+            self.data['sales'] = data
+            if return_df:
+                return data
+            
+        def calculate_RFM(self, data, return_df:bool=False):
+            data.loc[:,'InvoiceDate'] = pd.to_datetime(data.loc[:,'InvoiceDate'])
+            snapshot_date = max(data['InvoiceDate']) + pd.DateOffset(days=1)
+            data.loc[:,'TotalPrice'] = data.loc[:,'UnitPrice'] * data.loc[:,'Quantity']
+            rfm = data.groupby('CustomerID').agg({'InvoiceDate': lambda x: (snapshot_date - x.max()).days,
+                                                'InvoiceNo': lambda x: x.nunique(),
+                                                'TotalPrice': lambda x: x.sum()})
+            rfm.columns = ['Recency', 'Frequency', 'Monetary']
+            rfm['R_Score'] = pd.qcut(rfm['Recency'], 5, labels=[5, 4, 3, 2, 1])
+            rfm['F_Score'] = pd.qcut(rfm['Frequency'], 5,labels=[1,2,3,4],duplicates='drop')
+            rfm['M_Score'] = pd.qcut(rfm['Monetary'], 5, labels=[1, 2, 3, 4, 5])
+            self.data['rfm'] = rfm
+            if return_df:
+                return rfm
+
+        def perform_analysis(self,analysis:str='kmeans'):
+            rfm = self.data['rfm']
+            kmeans = KMeans(n_clusters=4, random_state=0).fit(rfm[['R_Score', 'F_Score', 'M_Score']])
+            rfm['Cluster'] = kmeans.labels_
+        
+        def plot_results(self):
+            rfm = self.data['rfm']
+            plt.figure(figsize=(10, 5))
+            for i in range(4):
+                plt.scatter(rfm[rfm['Cluster'] == i]['R_Score'], rfm[rfm['Cluster'] == i]['F_Score'], label=f'Cluster {i+1}')
+            plt.xlabel('Recency')
+            plt.ylabel('Frequency')
+            plt.title('RFM Clusters')
+            plt.legend()
+            plt.show()
+
+        def run_simulation(self):
+            data = self.get_data(return_df=True)
+            self.calculate_RFM(data)
+            self.perform_analysis()
+            self.plot_results()
+    
 class MSP(object):
     SimpleNamespace = type(sys.implementation)
     class SettableNamespace(SimpleNamespace):
@@ -888,3 +962,99 @@ class Wildlife(object):
     def birth_process(self, lam:int=1):
         for gen in range(10):
             print(lam)
+
+spyder_text = """
+
+dk_repo = "C:/repo/bitstaemr";sg_repo = "C:/stellar-grove"
+import sys;sys.path.append(sg_repo)
+import bitstaemr as bits
+#sys.path.append(dk_repo)
+
+
+
+
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.chains import (SimpleSequentialChain, 
+                              SequentialChain, 
+                              LLMChain)
+
+openai_api_key = bits.tools.get_stones('OPENAI_API_KEY')
+
+llm = ChatOpenAI(openai_api_key=openai_api_key)
+
+template = "Give me a simple bullet point outline for a blog post on {topic}"
+first_prompt = ChatPromptTemplate.from_template(template)
+chain_one = LLMChain(llm=llm,prompt=first_prompt)
+
+template2 = "Write a blog post using this outline: {outline}"
+second_prompt = ChatPromptTemplate.from_template(template2)
+chain_two = LLMChain(llm=llm,prompt=second_prompt)
+
+
+full_chain = SimpleSequentialChain(chains=[chain_one,chain_two],
+                                  verbose=True)
+
+result = full_chain.run("Data Engineering")
+print(result)
+
+#-------------------------------------------------------
+template1 = "Give a summary of this employee's performance review:\n{review}"
+prompt1 = ChatPromptTemplate.from_template(template1)
+chain_1 = LLMChain(llm=llm,
+                     prompt=prompt1,
+                     output_key="review_summary")
+
+template2 = "Identify key employee weaknesses in this review summary:\n{review_summary}"
+prompt2 = ChatPromptTemplate.from_template(template2)
+chain_2 = LLMChain(llm=llm,
+                     prompt=prompt2,
+                     output_key="weaknesses")
+
+template3 = "Create a personalized plan to help address and fix these weaknesses:\n{weaknesses}"
+prompt3 = ChatPromptTemplate.from_template(template3)
+chain_3 = LLMChain(llm=llm,
+                     prompt=prompt3,
+                     output_key="final_plan")
+
+
+seq_chain = SequentialChain(chains=[chain_1,chain_2,chain_3],
+                            input_variables=['review'],
+                            output_variables=['review_summary','weaknesses','final_plan'],
+                            verbose=True)
+
+
+employee_review = '''
+Employee Information:
+Name: Joe Schmo
+Position: Software Engineer
+Date of Review: July 14, 2023
+
+Strengths:
+Joe is a highly skilled software engineer with a deep understanding of programming languages, algorithms, and software development best practices. His technical expertise shines through in his ability to efficiently solve complex problems and deliver high-quality code.
+
+One of Joe's greatest strengths is his collaborative nature. He actively engages with cross-functional teams, contributing valuable insights and seeking input from others. His open-mindedness and willingness to learn from colleagues make him a true team player.
+
+Joe consistently demonstrates initiative and self-motivation. He takes the lead in seeking out new projects and challenges, and his proactive attitude has led to significant improvements in existing processes and systems. His dedication to self-improvement and growth is commendable.
+
+Another notable strength is Joe's adaptability. He has shown great flexibility in handling changing project requirements and learning new technologies. This adaptability allows him to seamlessly transition between different projects and tasks, making him a valuable asset to the team.
+
+Joe's problem-solving skills are exceptional. He approaches issues with a logical mindset and consistently finds effective solutions, often thinking outside the box. His ability to break down complex problems into manageable parts is key to his success in resolving issues efficiently.
+
+Weaknesses:
+While Joe possesses numerous strengths, there are a few areas where he could benefit from improvement. One such area is time management. Occasionally, Joe struggles with effectively managing his time, resulting in missed deadlines or the need for additional support to complete tasks on time. Developing better prioritization and time management techniques would greatly enhance his efficiency.
+
+Another area for improvement is Joe's written communication skills. While he communicates well verbally, there have been instances where his written documentation lacked clarity, leading to confusion among team members. Focusing on enhancing his written communication abilities will help him effectively convey ideas and instructions.
+
+Additionally, Joe tends to take on too many responsibilities and hesitates to delegate tasks to others. This can result in an excessive workload and potential burnout. Encouraging him to delegate tasks appropriately will not only alleviate his own workload but also foster a more balanced and productive team environment.
+'''
+
+
+results = seq_chain(employee_review)
+results.keys()
+print(results['final_plan'])
+
+
+
+"""
+

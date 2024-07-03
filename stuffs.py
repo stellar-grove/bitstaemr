@@ -3,7 +3,8 @@ import os
 
 class folders(object):
     # ------ Begin Folders ------ #
-    DATA_FOLDER = "C:/stellar-grove/tara/data/"
+    DATA_FOLDER_BITS = "C:/stellar-grove/bitstaemr/data/"
+    DATA_FOLDER_TARA = "C:/stellar-grove/tara/data/"
     DATA_FOLDER_SONGROVE = f"C:/stellar-grove/tara/SongroveBotanicals/data/"
        # ------ Begin Constants ----- #
     peep = os.environ["USERNAME"]
@@ -14,8 +15,11 @@ class folders(object):
     taraWD = f'{SGWD}ticondagrova - Documents/'
     download = f'C:/Users/{peep}/Downloads/'
     kaggleWD = f'{taraWD}Kaggle/'
+    financeWD = f'{taraWD}data/Financial/'
     server = f'{robot}\SQLEXPRESS'
     sniffnet = 'sniffnet.database.windows.net'
+    cannabis_data = f'{taraWD}data/Cannabis/'
+    udemyWD = f'{bitsWD}Development/Udemy/'
     DB_tara = {'servername': server,
             'database': 'tara',
             'driver': 'driver=SQL Server Native Client 11.0'
@@ -62,3 +66,12 @@ class lists(object):
                       'statTypes'
                       ,'windDirection'
                       ]
+    
+class urls(object):
+    SIM_MKT_SEGMENTATION = "https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx"
+    DOSIA_MD_DATA_DASHBOARD = "https://cannabis.maryland.gov/Pages/Data-Dashboard.aspx"
+
+class CREAM(object):
+    EQUITY = 'EQUITY'
+    ETF = 'ETF'
+

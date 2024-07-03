@@ -16,7 +16,7 @@ import sqlalchemy
 import numpy as np
 import os
 import bitstaemr.stuffs as stuffs
-from bitstaemr import tools
+from bitstaemr import (tools, dataUtils)
 import yfinance as yf
 import datetime as dt
 import scipy.stats
@@ -169,46 +169,131 @@ class AlphaVantage(object):
 
 class stocks(object):
 
+#    class prices(object):
+
+#    class financials(object):
+
+#    class holders(object):
     def __init__(self, ticker) -> None:
         self.config = {}
         self.ticker = yf.Ticker(ticker)
+        self.ticker_str = ticker
         self.data = {}
 
-    def setTicker(self, ticker):
+    def SET_TICKER(self, ticker):
         self.ticker = yf.Ticker(ticker)
         return yf.Ticker(ticker)
 
-    def getHistory(self,time_period):
+    def HISTORY(self,time_period):
         history = self.ticker.history(period=time_period)
         self.data['history'] = history
-        self.data['history_meta'] = self.ticker.history_metadata
-        return history
+        metadata = self.ticker.history_metadata
+        self.data['history_meta'] = metadata
+        
+        return (history,metadata)
 
-    def getOptions(self,ticker):
+    def OPTIONS(self,ticker):
         tkr = self.setTicker(ticker)
         chain = tkr.option_chain(tkr)
         return chain
 
-    def getIncomeStatement(self):
-        inc = self.ticker.income_stmt.T.reset_index()
-        qtInc = self.ticker.quarterly_income_stmt.T.reset_index()
-        return (inc, qtInc)
+    def INCOME_STATEMENT(self):
+        qt = self.ticker.quarterly_income_stmt
+        qt = infrastructure.transform_financials(self, df=qt)
+        yr = self.ticker.income_stmt
+        yr = infrastructure.transform_financials(self, df=yr)
+        return (qt, yr)
 
-    def getBalanceSheet(self):
-        bal = self.ticker.balance_sheet
-        qtBal = self.ticker.quarterly_balance_sheet
-        return (bal, qtBal)
+    def BALANCE_SHEET(self):
+        qt = self.ticker.quarterly_balance_sheet
+        # qt['date'] = qt['index'].dt.strftime("%Y-%m-%d")
+        # qt.drop(columns='index',inplace=True)
+        # qt['ticker'] = self.ticker_str
+        # qt['id'] = qt['date'].str.replace("-","")+ '.' + qt['ticker']
+        # n = len(qt.columns) - 3
+        # qt.dropna(axis=0,thresh=n,inplace=True)
+        yr = self.ticker.balance_sheet.T.reset_index()
+        # yr['date'] = yr['index'].dt.strftime("%Y-%m-%d")
+        # yr.drop(columns='index',inplace=True)
+        # yr['ticker'] = self.ticker_str
+        # yr['id'] = yr['date'].str.replace("-","")+ '.' + yr['ticker']
+        # n = len(yr.columns) - 3
+        # yr.dropna(axis=0,thresh=n,inplace=True)
+        return (qt, yr)
 
-    def getCashFlow(self):
+    def CASH_FLOW(self):
         cf = self.ticker.cashflow
         qtCf = self.ticker.quarterly_cashflow
         return (cf, qtCf)
     
-    def getCorporateActions(self):
+    def CORPORATE_ACTIONS(self):
         act = self.ticker.actions
         div = self.ticker.dividends
         splits = self.ticker.splits
         return (act, div, splits)
+
+    def SHARECOUNT(self):
+        # show share count
+        full_shares = pd.DataFrame(self.ticker.get_shares_full()).reset_index()
+        full_shares.columns = ['Date', 'Share Count']
+        full_shares.loc[:,'ticker'] = self.ticker_str
+        return full_shares
+
+    def NEWS(self,return_df=True):
+        articles = self.ticker.news
+        keys = ['uuid', 'title', 'publisher', 'link', 'providerPublishTime', 'type', 'relatedTickers']
+        df_news = pd.DataFrame(columns=keys)
+        for article in articles:
+            df = pd.DataFrame.from_dict(article,orient='index').T
+            df = df[keys]
+            df_news = pd.concat([df, df_news])
+        df_news.loc[:,'ticker'] = self.ticker_str
+        if return_df:
+            return df_news
+
+    def MAJOR_HOLDERS(self,return_df=True):
+        mh = self.ticker.major_holders
+        mh.loc[:,'ticker'] = self.ticker_str
+        return mh
+    
+    def INSTITUTIONAL_HOLDERS(self, return_df=True):
+        ih = self.ticker.institutional_holders
+        ih.loc[:,'ticker'] = self.ticker_str
+        return ih
+    
+    def MUTUALFUND_HOLDERS(self, return_df=True):
+        mfh = self.ticker.mutualfund_holders
+        mfh.loc[:,'ticker'] = self.ticker_str
+        return mfh
+    
+    def INSIDER_TRANSACTIONS(self, return_df=True):
+        intx = self.ticker.insider_transactions
+        intx.loc[:,'ticker'] = self.ticker_str
+        return intx
+    
+    def INSIDER_PURCHASES(self, return_df=True):
+        inpur = self.ticker.insider_purchases
+        inpur.loc[:,'ticker'] = self.ticker_str
+        return inpur
+    
+    def INSIDER_ROSTER_HOLDERS(self, return_df=True):
+        inroshol = self.ticker.insider_roster_holders
+        inroshol.loc[:,'ticker'] = self.ticker_str
+        return inroshol
+
+
+            # show financials:
+    
+    def RECOMMENDATONS(self):
+        # show recommendations
+        rec = self.ticker.recommendations
+        rec.loc[:,'ticker'] = self.ticker_str
+        recsum = self.ticker.recommendations_summary
+        recsum.loc[:,'ticker'] = self.ticker_str
+        ugdg = self.ticker.upgrades_downgrades
+        ugdg.loc[:,'ticker'] = self.ticker_str
+        return (rec, recsum, ugdg)
+
 
     spydertext = '''
 
@@ -429,8 +514,131 @@ class MCMC(object):
         plt.xlabel(xlabel="Volatility")
         plt.ylabel(ylabel="Return")
 
+class infrastructure(object):
+    def __init__(self) -> None:
+        self.config = {'data_dir':stuffs.folders.financeWD}
+        self.ratios = {}
+        self.stats = {}
 
-spyder_text = """
+    def transform_financials(self, df:pd.DataFrame):
+        df = df.T.reset_index()
+        df['date'] = df['index'].dt.strftime("%Y-%m-%d")
+        df.drop(columns='index',inplace=True)
+        df['ticker'] = self.ticker_str
+        df['id'] = df['date'].str.replace("-","")+ '.' + df['ticker']
+        n = len(df.columns) - 3
+        df.dropna(axis=0,thresh=n,inplace=True)
+        return df
+
+    def transform_prices(self,price_data:pd.DataFrame, instrument_type:str):
+        if instrument_type.upper() == stuffs.CREAM.EQUITY:
+            price_data = price_data.reset_index()
+            price_data['Date'] = price_data['Date'].dt.strftime("%Y-%m-%d")
+            price_data.loc[:,'px_id'] = price_data['Date'].str.replace("-","") + price_data['ticker']
+            return price_data
+        
+        if instrument_type.upper() == stuffs.CREAM.ETF:
+            price_data = price_data.reset_index()
+            price_data['Date'] = price_data['Date'].dt.strftime("%Y-%m-%d")
+            price_data.loc[:,'px_id'] = price_data['Date'].str.replace("-","") + price_data['ticker']
+            price_data = price_data.drop(columns=['Capital Gains'])
+            return price_data
+
+    def determine_new_prices(self, price_data):
+        data_dir = self.config['data_dir']
+        file_name = f'{data_dir}px.csv'
+        px_data = pd.read_csv(file_name)
+        deltas = dataUtils.determine_deltas(price_data, px_data, ['px_id', 'px_id'])
+        return deltas
+    
+    def transform_share_count(self,price_data:pd.DataFrame):
+
+        price_data = price_data.reset_index()
+        price_data['Date'] = price_data['Date'].dt.strftime("%Y-%m-%d")
+        price_data.loc[:,'id'] = price_data['Date'].str.replace("-","") + price_data['ticker']
+        return price_data
+    
+        if instrument_type.upper() == stuffs.CREAM.ETF:
+            price_data = price_data.reset_index()
+            price_data['Date'] = price_data['Date'].dt.strftime("%Y-%m-%d")
+            price_data.loc[:,'px_id'] = price_data['Date'].str.replace("-","") + price_data['ticker']
+            price_data = price_data.drop(columns=['Capital Gains'])
+            return price_data
+
+    def determine_new_shares(self, price_data):
+        data_dir = self.config['data_dir']
+        file_name = f'{data_dir}px.csv'
+        px_data = pd.read_csv(file_name)
+        deltas = dataUtils.determine_deltas(price_data, px_data, ['px_id', 'px_id'])
+        return deltas
+    
+    def process_share_count(self,ticker:str=None, write_to_csv:bool=False, verbose:bool=True):
+        if ticker != None:
+            share_count = stocks(ticker).getShareCount()
+            price_data['ticker'] = ticker
+            price_data = self.transform_prices(price_data,instrument_type)
+            deltas = self.determine_new_prices(price_data)
+            txt = f"""
+                        Writing {deltas.shape}
+
+                        """
+            
+            if write_to_csv:
+                txt = f"""
+                        Writing {deltas.shape[0]}
+
+                        """
+                self.px_to_csv(deltas)
+                print(txt)
+                
+        else:
+            price_data = "TICKER NEEDS TO BE INCLUDED"
+
+        return deltas
+
+    def px_to_csv(self, price_data:pd.DataFrame):
+        data_dir = self.config['data_dir']
+        file_name = f'{data_dir}px.csv'
+        price_data.to_csv(file_name,
+                            sep=',',
+                            mode='a',
+                            index=False,
+                            header=False
+                            )
+
+    def process_prices(self,ticker:str=None, write_to_csv:bool=False, verbose:bool=True):
+        if ticker != None:
+            price_data, meta_data = stocks(ticker).getHistory(time_period='max')
+            instrument_type = meta_data['instrumentType']
+            price_data['ticker'] = ticker
+            price_data = self.transform_prices(price_data,instrument_type)
+            deltas = self.determine_new_prices(price_data)
+            txt = f"""
+                        Writing {deltas.shape}
+
+                        """
+            
+            if write_to_csv:
+                txt = f"""
+                        Writing {deltas.shape[0]}
+
+                        """
+                self.px_to_csv(deltas)
+                print(txt)
+                
+        else:
+            price_data = "TICKER NEEDS TO BE INCLUDED"
+
+        return deltas
+
+    def pxdb(self):
+        data_dir = self.config['data_dir']
+        file_name = f'{data_dir}px.csv'
+        df_px = pd.read_csv(file_name)
+        return df_px
+
+class text(object):
+    spyder_text = """
 
 dk_repo = "C:/repo/bitstaemr";sg_repo = "C:/stellar-grove"
 import sys;sys.path.append(sg_repo)
