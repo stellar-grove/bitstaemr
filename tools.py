@@ -11,6 +11,8 @@ import numpy as np
 from collections.abc import MutableMapping
 import shutil
 import math
+from sqlalchemy import create_engine, text
+import openai
 
 # ------ Begin Constants ----- #
 peep = os.environ["USERNAME"]
@@ -24,6 +26,7 @@ taraWD = f'{SGWD}/ticondagrova - Documents/'
 
 
 # ------  Begin Functions -------------------
+
 
 def concatList(lst, separator):
     lst = [str(x) for x in lst]
@@ -210,6 +213,116 @@ def move_file(source_path, destination_path):
         print(f"File moved successfully from {source_path} to {destination_path}.")
     except Exception as e:
         print(e)
+
 def print_keys(dict:dict):
     return dict.keys()
 
+
+
+# ------ NLP FUNCTIONS ---------
+
+class NaturalLangaugeProcessing(object):
+
+    def __init__(self)-> None:
+        self.config = {}
+
+    def dataframe_to_database(df, table_name):
+        """Convert a pandas dataframe to a database.
+            Args:
+                df (dataframe): pd.DataFrame which is to be converted to a database
+                table_name (string): Name of the table within the database
+            Returns:
+                engine: SQLAlchemy engine object
+        """
+        engine = create_engine(f'sqlite:///:memory:', echo=False)
+        df.to_sql(name=table_name, con=engine, index=False)
+        return engine
+
+    def handle_OpenAI_response(response):
+        """Handles the response from OpenAI.
+
+        Args:
+            response (openAi response): Response json from OpenAI
+
+        Returns:
+            string: Proposed SQL query
+        """
+        query = response["choices"][0]["text"]
+        if query.startswith(" "):
+            query = "Select"+ query
+        return query
+
+    def execute_query(engine, query):
+        """Execute a query on a database.
+
+        Args:
+            engine (SQLAlchemy engine object): database engine
+            query (string): SQL query
+
+        Returns:
+            list: List of tuples containing the result of the query
+        """
+        with engine.connect() as conn:
+            result = conn.execute(text(query))
+            return result.fetchall()
+        
+    def create_table_definition_prompt(df, table_name):
+        """This function creates a prompt for the OpenAI API to generate SQL queries.
+
+        Args:
+            df (dataframe): pd.DataFrame object to automtically extract the table columns
+            table_name (string): Name of the table within the database
+
+            Returns: string containing the prompt for OpenAI
+        """
+        
+        prompt = '''### sqlite table, with its properties:
+    #
+    # {}({})
+    #
+    '''.format(table_name, ",".join(str(x) for x in df.columns))
+        
+        return prompt
+
+    def user_query_input():
+        """Ask the user what they want to know about the data.
+
+        Returns:
+            string: User input
+        """
+        user_input = input("Tell OpenAi what you want to know about the data: ")
+        return user_input
+
+    def combine_prompts(fixed_sql_prompt, user_query):
+        """Combine the fixed SQL prompt with the user query.
+
+        Args:
+            fixed_sql_prompt (string): Fixed SQL prompt
+            user_query (string): User query
+
+        Returns:
+            string: Combined prompt
+        """
+        final_user_input = f"### A query to answer: {user_query}\nSELECT"
+        return fixed_sql_prompt + final_user_input
+
+    def send_to_openai(prompt):
+        """Send the prompt to OpenAI
+
+        Args:
+            prompt (string): Prompt to send to OpenAI
+
+        Returns:
+            string: Response from OpenAI
+        """
+        response = openai.Completion.create(
+            engine="code-davinci-002",
+            prompt=prompt,
+            temperature=0,
+            max_tokens=150,
+            top_p=1.0,
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+            stop=["#", ";"]
+        )
+        return response
