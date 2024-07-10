@@ -3,9 +3,11 @@ import sys; sys.path.append("C:/stellar-grove/")
 import pandas as pd
 from bitstaemr import (stuffs as stuffs, tools as tools)
 import statsapi as mlb
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import requests
-
+import numpy as np
+import pybaseball as pb
+import sqlalchemy
 
 def remove_characters(text):
     cleaned_text = text.replace(r'[^a-zA-Z0-9\s]', '')
@@ -76,7 +78,7 @@ class MLB(object):
         self.end_date = '2024-12-31'
         self.log = {}    
 
-    def getSchedule(self, start_date:str='2024-01-01', end_date:str='2024-12-31'):
+    def getSchedule(self, start_date:str='2024-01-01', end_date:str='2024-12-31'):  
         schedule = mlb.schedule(start_date=start_date, end_date=end_date)
         schedule = tools.listDictionaryToDataFrame(schedule)
         return schedule
@@ -96,10 +98,87 @@ class MLB(object):
         roster.loc[:,'TEAM_NUMBER'] = teamId
         return roster
 
+    def getPlayers(self,return_df:bool=False):
+        player_stats = mlb.lookup_player('')
+        df_players = pd.DataFrame()
+        for i in range(len(player_stats)):
+            player = player_stats[i]
+            new = pd.json_normalize(player)
+            if new.shape[1] == 19:
+                new['nickName'] = np.nan
+            df_players = pd.concat([df_players,new],axis=0)
+            if return_df:
+                return df_players
+    
+    def getAttendance(self, game_id=int, return_df:bool=False):
+        game_info = self.getBoxScore(game_id)['gameBoxInfo']
+        for i in range(len(game_info)):
+            if game_info[i]['label'] == 'Att':
+                attendance = int(game_info[i]['value'].replace(",","").replace(".",""))
+                return attendance
+            #else:
+            #    return None
+        
+    class statcast(object):
+
+        def __init__(self) -> None:
+            self.data_dir = f'{tools.taraWD}Baseball/data/'
+            self.database_loc = f'{tools.taraWD}Baseball/data/statcast.csv'
+            self.start_date = '2024-01-01'
+            self.end_date = '2024-12-31'
+            self.log = {}   
+
+        def get_data(self,start_date=None,end_date=None,team=None,return_df:bool=False):
+            df = pb.statcast(start_dt=start_date, end_dt=end_date, team=team)
+            df['id'] = df['game_pk'].astype(str) + '.' + df['at_bat_number'].astype(str) + '.' + df['pitch_number'].astype(str)
+            sort_columns = ['game_pk','at_bat_number','pitch_number']
+            df = df.sort_values(by=sort_columns)
+            if return_df:
+                return df
+        
+        def determine_deltas(self,data,return_df:bool=False):
+            df_source = data
+            df_target = MLB.infrastructure().get_database(database_name='statcast')
+            deltas = determine_deltas(df_source, df_target, ['id','id'])
+            if return_df:
+                return deltas
+        
+        def write_to_csv(self,data:pd.DataFrame):
+            file_location = self.database_loc
+            data.to_csv(file_location,header=False,index=False,mode='a')
+            records = data.shape[0]
+            db_records_final = pd.read_csv(file_location).shape[0]
+            text = f'There were {records} written to the database.  The current number of records in the database is {db_records_final}.'
+            print(text)
+
+        def write_to_sql(self,data:pd.DataFrame,cnxn:str):
+            engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server}/{database}?{driver},echo=True')
+            
+
+            return 'oppo'
+
+
+        def run(self,game_date=None,team=None):
+            
+            today = date.today()
+            yesterday = today - timedelta(days=1)
+            yesterday = yesterday.strftime("%Y-%m-%d")
+            data = self.get_data(start_date=yesterday,
+                                 end_date=yesterday,
+                                 team=None,
+                                 return_df=True)            
+            deltas = self.determine_deltas(data,return_df=True)
+            if deltas.shape[0] == 0:
+                print("No records to be written")
+                return None
+            else:
+                self.write_to_csv(deltas)
+            
     class infrastructure(object):
+
         def __init__(self)->None:
             self.data_dir = f'{tools.taraWD}Baseball/data/'
-            self.database_path = f'{self.data_dir}schedule.csv'
+            self.db_schedule = f'{self.data_dir}schedule.csv'
 
         def get_meta(self,meta_type:str="baseballStats",return_list=True):
             if meta_type in self.meta_types:
@@ -111,7 +190,7 @@ class MLB(object):
                     print(meta)
                     return meta
 
-        def infrastructure_Teams(self,schedule:pd.DataFrame):
+        def get_teams(self,schedule:pd.DataFrame):
             list_teams = []
             away_teams = schedule[['away_id','away_name']]
             away_teams.columns = ['team_id','team_name']
@@ -122,23 +201,49 @@ class MLB(object):
             ids = teams.value_counts(['team_id','team_name']).reset_index().drop('count',axis=1)
             return ids
 
-        def find_new_games(self, df:pd.DataFrame):
-            current_schedule = df
-            schedule_database =  pd.read_csv(self.database_path)
+        def find_new_games(self,df_schedule:pd.DataFrame):
+            
+            current_schedule = df_schedule
+            schedule_database =  pd.read_csv(self.db_schedule)
             current_schedule, schedule_database = current_schedule.align(schedule_database, join='inner', axis=1)
             deltas = determine_deltas(current_schedule, schedule_database,['game_id','game_id'])
             return deltas
         
-        def get_database(self):
-            return pd.read_csv(self.database_path)
-        
+        def get_database(self, database_name):
+            database_path = f'{self.data_dir}{database_name}.csv'
+            return pd.read_csv(database_path)
+
+        def find_new_players(self):
+            players = MLB.getPlayers()
+            db_players = self.get_database(players)
+            
         def write_to_csv(self,df:pd.DataFrame,file_name):
-            df.to_csv(file_name,header=True,index=False,mode='a')
+            df.to_csv(file_name,header=False,index=False,mode='a')
             text = f'''There were {df.shape[0]} records written to the database.
-            The database is found at {self.database_path}'''
+            The database is found at {self.db_schedule}'''
             return print(text)
 
+        def write_to_sql(self,df:pd.DataFrame,tgtTbl:str):
+            computerName = os.environ['COMPUTERNAME']
+            database = 'tara'
+            server = f'{computerName}\SQLEXPRESS'
+            driver = 'driver=ODBC Driver 17 for SQL Server'
+            tgtSchema = 'mlb'
+            #engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server}/{database}?{driver},echo=True')
+            engine = sqlalchemy.create_engine('mssql+pyodbc://STARFIGHTER533\\SQLEXPRESS/tara?driver=ODBC+Driver+17+for+SQL+Server', echo=True)
+            print(tgtTbl,engine)
+            df.to_sql(tgtTbl,con=engine,if_exists='append',schema=tgtSchema,index=False)
 
+        def update_schedule(self):
+            schedule = MLB.getSchedule(MLB)
+            schedule = schedule.loc[schedule["status"] in stuffs.lists.MLB.list_game_completion_types]
+            new_games = self.find_new_games(schedule)
+
+            if new_games.shape[0] != 0:
+                self.write_to_csv(new_games,self.db_schedule)
+                print(f'{new_games.shape[0]} records were written.')
+            return new_games
+        # -- Lists and constants
 
         meta_types = [
             'awards',

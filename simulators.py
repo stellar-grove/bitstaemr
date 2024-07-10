@@ -732,6 +732,12 @@ class Baseball(object):
             self.system = {}
         
         
+        launch_angle = {"Ground ball":{"low":0,"high":10},
+                        "Line drive":{"low":10,"high":25},
+                        "Fly ball":{"low":25,"high":50},
+                        "Pop up":{"low":50,"high":90}
+                        }
+
         def pitch_ball(pitcherName:str='Yoko Ono'):
             # Look up the pitcher to determine their attributes. This requires a dictionary to be made
             for pitch in np.arange(1,7):
@@ -743,6 +749,7 @@ class Baseball(object):
                 print(f"pitch Number: {pitch} had a location of {pitch_location}, which correlates to a {ball_strike}")
             return pitch_location
 
+        hit_type
 
         #----- Lists, Dictionaries and Constants -----#
 
@@ -765,6 +772,8 @@ class Baseball(object):
                        'intentional_ball',
                        'pitchout'
                        ]
+        
+
 class Marketing(object):
 
     class ABTesting(object):
