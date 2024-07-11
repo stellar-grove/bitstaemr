@@ -6,7 +6,7 @@ import statsapi as mlb
 from datetime import datetime, timedelta, date
 import requests
 import numpy as np
-import pybaseball as pb
+import pybaseball as pyball
 import sqlalchemy
 
 def remove_characters(text):
@@ -129,7 +129,7 @@ class MLB(object):
             self.log = {}   
 
         def get_data(self,start_date=None,end_date=None,team=None,return_df:bool=False):
-            df = pb.statcast(start_dt=start_date, end_dt=end_date, team=team)
+            df = pyball.statcast(start_dt=start_date, end_dt=end_date, team=team)
             df['id'] = df['game_pk'].astype(str) + '.' + df['at_bat_number'].astype(str) + '.' + df['pitch_number'].astype(str)
             sort_columns = ['game_pk','at_bat_number','pitch_number']
             df = df.sort_values(by=sort_columns)
@@ -157,6 +157,86 @@ class MLB(object):
 
             return 'oppo'
 
+        def DRAFT(self, year:int, round, keep_stats:bool=True):
+            df = pyball.amateur_draft(year, draft_round=1, keep_stats=keep_stats)
+            return df
+
+        def DRAFT_TEAM(self, team:str="PHI", year:int=None, keep_stats:bool=True):
+            df = pyball.amateur_draft_by_team(team, year, keep_stats=False)
+            return df
+
+        def BWAR_BAT(self):
+            df = pyball.bwar_pitch(return_all=True)
+            return df
+
+        def BWAR_PITCH(self):
+            df = pyball.bwar_pitch(return_all=True)
+            return df
+
+        def BATTING_STATS(self,start:int=None,end:int=None):
+            df = pyball.batting_stats(start,end)
+            return df
+
+        def BATTING_STATS_BREF(self,season:int=None):
+            df = pyball.batting_stats_bref(season)
+            return df
+        
+        def CATCHER_FRAMING(self, season:int=None):
+            df = pyball.statcast_catcher_framing(season)
+            return df
+
+        def CATCHER_POPTIME(self, season:int=None):
+            df = pyball.statcast_catcher_poptime(season)
+            return df
+        
+        def CATCHER_POPTIME(self, season:int=None):
+            df = pyball.statcast_outfielder_jump(season)
+            return df
+        
+        def PITCHER_EXPECTED_STATS(self, season:int=None):
+            df = pyball.statcast_pitcher_expected_stats(season)
+            return df
+
+        def PITCHER_PITCH_ARSENAL(self, season:int=None):
+            df = pyball.statcast_pitcher_pitch_arsenal(season)
+            return df
+        
+        def PITCHER_PITCH_ARSENAL_SPEED(self, season:int=None):
+            df = pyball.statcast_pitcher_pitch_arsenal(season,arsenal_type="avg_speed")
+            return df
+        
+        def PITCHER_PITCH_ARSENAL_SPIN(self, season:int=None):
+            df = pyball.statcast_pitcher_pitch_arsenal(season,arsenal_type="avg_spin")
+            return df
+        
+        def PITCHER_PITCH_ARSENAL_PCT(self, season:int=None):
+            df = pyball.statcast_pitcher_pitch_arsenal(season,arsenal_type="n_")
+            return df
+        
+        def PITCHER_PITCH_ARSENAL_STATS(self, season:int=None):
+            df = pyball.statcast_pitcher_arsenal_stats(season)
+            return df
+        
+        def PITCHER_PERCENTILE_RANKS(self, season:int=None):
+            df = pyball.statcast_pitcher_percentile_ranks(season)
+            return df
+        
+        def SPRINT_SPEED(self, season:int=None):
+            df = pyball.statcast_sprint_speed(season)
+            return df
+        
+        def RUNNING_SPLITS(self, season:int=None):
+            df = pyball.statcast_running_splits(season)
+            return df
+        
+        def SPRINT_SPEED(self, season:int=None):
+            df = pyball.statcast_single_game(season)
+            return df
+        
+        def SINGLE_GAME(self, game_id:int=529429):
+            df = pyball.statcast_single_game(game_id)
+            return df
+   
 
         def run(self,game_date=None,team=None):
             
