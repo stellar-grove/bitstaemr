@@ -237,7 +237,6 @@ class MLB(object):
             df = pyball.statcast_single_game(game_id)
             return df
    
-
         def run(self,game_date=None,team=None):
             
             today = date.today()
