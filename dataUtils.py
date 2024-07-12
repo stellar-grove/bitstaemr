@@ -8,6 +8,9 @@ import requests
 import numpy as np
 import pybaseball as pyball
 import sqlalchemy
+import pyodbc as db
+
+yesterday = (date.today() - timedelta(days=3)).strftime('%Y-%m-%d')
 
 def remove_characters(text):
     cleaned_text = text.replace(r'[^a-zA-Z0-9\s]', '')
@@ -72,90 +75,63 @@ class LowCostDataInfrastructure(object):
 
 class MLB(object):
 
-    def __init__(self) -> None:
-        self.data_dir = f'{tools.taraWD}Baseball/data/'
-        self.start_date = '2024-01-01'
-        self.end_date = '2024-12-31'
-        self.log = {}    
+    class statsapi(object):
+        def __init__(self) -> None:
+            self.data_dir = f'{tools.taraWD}Baseball/data/'
+            self.start_date = '2024-01-01'
+            self.end_date = '2024-12-31'
+            self.log = {}    
 
-    def getSchedule(self, start_date:str='2024-01-01', end_date:str='2024-12-31'):  
-        schedule = mlb.schedule(start_date=start_date, end_date=end_date)
-        schedule = tools.listDictionaryToDataFrame(schedule)
-        return schedule
-    
-    def getBoxScore(self,game_id=int):
-        box_score = mlb.boxscore_data(game_id)
-        return box_score
-
-    def getRoster(self,teamId,roster_type=None,return_df:bool=True):
-
-        roster_lines = mlb.roster(teamId, rosterType=None, season=datetime.now().year, date=None).split('\n')
-        roster = []
-        for line in roster_lines:
-            roster.append(line.split('  '))
-        roster = pd.DataFrame(roster).dropna()
-        roster.columns = ['NUMBER','POSITION','PLAYER_NAME']
-        roster.loc[:,'TEAM_NUMBER'] = teamId
-        return roster
-
-    def getPlayers(self,return_df:bool=False):
-        player_stats = mlb.lookup_player('')
-        df_players = pd.DataFrame()
-        for i in range(len(player_stats)):
-            player = player_stats[i]
-            new = pd.json_normalize(player)
-            if new.shape[1] == 19:
-                new['nickName'] = np.nan
-            df_players = pd.concat([df_players,new],axis=0)
-            if return_df:
-                return df_players
-    
-    def getAttendance(self, game_id=int, return_df:bool=False):
-        game_info = self.getBoxScore(game_id)['gameBoxInfo']
-        for i in range(len(game_info)):
-            if game_info[i]['label'] == 'Att':
-                attendance = int(game_info[i]['value'].replace(",","").replace(".",""))
-                return attendance
-            #else:
-            #    return None
+        def getSchedule(self, start_date:str='2024-01-01', end_date:str='2024-12-31'):  
+            schedule = mlb.schedule(start_date=start_date, end_date=end_date)
+            schedule = tools.listDictionaryToDataFrame(schedule)
+            return schedule
         
-    class statcast(object):
+        def getBoxScore(self,game_id=int):
+            box_score = mlb.boxscore_data(game_id)
+            return box_score
 
+        def getRoster(self,teamId,roster_type=None,return_df:bool=True):
+
+            roster_lines = mlb.roster(teamId, rosterType=None, season=datetime.now().year, date=None).split('\n')
+            roster = []
+            for line in roster_lines:
+                roster.append(line.split('  '))
+            roster = pd.DataFrame(roster).dropna()
+            roster.columns = ['NUMBER','POSITION','PLAYER_NAME']
+            roster.loc[:,'TEAM_NUMBER'] = teamId
+            return roster
+
+        def getPlayers(self,return_df:bool=False):
+            player_stats = mlb.lookup_player('')
+            df_players = pd.DataFrame()
+            for i in range(len(player_stats)):
+                player = player_stats[i]
+                new = pd.json_normalize(player)
+                if new.shape[1] == 19:
+                    new['nickName'] = np.nan
+                df_players = pd.concat([df_players,new],axis=0)
+                if return_df:
+                    return df_players
+        
+        def getAttendance(self, game_id=int, return_df:bool=False):
+            game_info = self.getBoxScore(game_id)['gameBoxInfo']
+            for i in range(len(game_info)):
+                if game_info[i]['label'] == 'Att':
+                    attendance = int(game_info[i]['value'].replace(",","").replace(".",""))
+                    return attendance
+                #else:
+                #    return None
+            
+    class statcast(object):
+        
         def __init__(self) -> None:
             self.data_dir = f'{tools.taraWD}Baseball/data/'
             self.database_loc = f'{tools.taraWD}Baseball/data/statcast.csv'
             self.start_date = '2024-01-01'
             self.end_date = '2024-12-31'
+            self.yesterday = yesterday
             self.log = {}   
-
-        def get_data(self,start_date=None,end_date=None,team=None,return_df:bool=False):
-            df = pyball.statcast(start_dt=start_date, end_dt=end_date, team=team)
-            df['id'] = df['game_pk'].astype(str) + '.' + df['at_bat_number'].astype(str) + '.' + df['pitch_number'].astype(str)
-            sort_columns = ['game_pk','at_bat_number','pitch_number']
-            df = df.sort_values(by=sort_columns)
-            if return_df:
-                return df
-        
-        def determine_deltas(self,data,return_df:bool=False):
-            df_source = data
-            df_target = MLB.infrastructure().get_database(database_name='statcast')
-            deltas = determine_deltas(df_source, df_target, ['id','id'])
-            if return_df:
-                return deltas
-        
-        def write_to_csv(self,data:pd.DataFrame):
-            file_location = self.database_loc
-            data.to_csv(file_location,header=False,index=False,mode='a')
-            records = data.shape[0]
-            db_records_final = pd.read_csv(file_location).shape[0]
-            text = f'There were {records} written to the database.  The current number of records in the database is {db_records_final}.'
-            print(text)
-
-        def write_to_sql(self,data:pd.DataFrame,cnxn:str):
-            engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server}/{database}?{driver},echo=True')
-            
-
-            return 'oppo'
 
         def DRAFT(self, year:int, round, keep_stats:bool=True):
             df = pyball.amateur_draft(year, draft_round=1, keep_stats=keep_stats)
@@ -189,7 +165,7 @@ class MLB(object):
             df = pyball.statcast_catcher_poptime(season)
             return df
         
-        def CATCHER_POPTIME(self, season:int=None):
+        def OUTFIELDER_JUMP(self, season:int=None):
             df = pyball.statcast_outfielder_jump(season)
             return df
         
@@ -236,13 +212,51 @@ class MLB(object):
         def SINGLE_GAME(self, game_id:int=529429):
             df = pyball.statcast_single_game(game_id)
             return df
-   
-        def run(self,game_date=None,team=None):
+
+        def hit_api(self,start_date=yesterday,end_date=yesterday,team=None,return_df:bool=True):
+            df = pyball.statcast(start_dt=start_date, end_dt=end_date, team=team)
+            #df = pyball.statcast()
+            df['game_date'] = df['game_date'].dt.strftime('%Y-%m-%d')
+            df['id'] = df['game_pk'].astype(str) + '.' + df['at_bat_number'].astype(str) + '.' + df['pitch_number'].astype(str)
+            sort_columns = ['game_pk','at_bat_number','pitch_number']
+            df = df.sort_values(by=sort_columns)
+            if return_df:
+                return df
+        
+        def determine_deltas(self,data,return_df:bool=True):
+            df_source = data
+            df_target = MLB.infrastructure().get_database(database_name='statcast')
+            deltas = determine_deltas(df_source, df_target, ['id','id'])
+            if return_df:
+                return deltas
+        
+        def write_to_csv(self,data:pd.DataFrame):
+            file_location = self.database_loc
+            data.to_csv(file_location,header=False,index=False,mode='a')
+            records = data.shape[0]
+            db_records_final = pd.read_csv(file_location).shape[0]
+            text = f'There were {records} written to the database.  The current number of records in the database is {db_records_final}.'
+            print(text)
+
+        def write_to_sql(self,data:pd.DataFrame,cnxn:str=None,table_name:str=None, schema_name:str='mlb'):
+            server = stuffs.connections.MLB_SQL_SERVER_EXPRESS['server']
+            database = stuffs.connections.MLB_SQL_SERVER_EXPRESS['database']
+            driver = stuffs.connections.MLB_SQL_SERVER_EXPRESS['driver']
+            trusted = stuffs.connections.MLB_SQL_SERVER_EXPRESS['trusted']
+            if cnxn == None:
+                    engine = sqlalchemy.create_engine('mssql+pyodbc://' + server + '/' + database + "?" + driver,echo=True)
+                    print('engine done')
+            data.to_sql(table_name,con=engine,schema=schema_name,index=False,if_exists='append')
+            return_string = f'There were {data.shape[0]} records written to {schema_name}.{table_name}.'            
+
+            return return_string
+
+        def run_STATCAST(self,game_date=None,team=None):
             
             today = date.today()
             yesterday = today - timedelta(days=1)
             yesterday = yesterday.strftime("%Y-%m-%d")
-            data = self.get_data(start_date=yesterday,
+            data = self.hit_api(start_date=yesterday,
                                  end_date=yesterday,
                                  team=None,
                                  return_df=True)            
@@ -251,7 +265,8 @@ class MLB(object):
                 print("No records to be written")
                 return None
             else:
-                self.write_to_csv(deltas)
+                self.write_to_sql(deltas,table_name='statcast')
+                
             
     class infrastructure(object):
 
@@ -323,6 +338,10 @@ class MLB(object):
                 print(f'{new_games.shape[0]} records were written.')
             return new_games
         # -- Lists and constants
+
+        class queries(object):
+            select = 'select * from mlb.'
+            v_stats_pitches = f'{select}v_stats_pitches'
 
         meta_types = [
             'awards',
@@ -400,6 +419,64 @@ roster = mlb.getRoster(103)
 infra = mlb.infrastructure()
 for meta_type in infra.meta_types:
     infra.get_meta(meta_type)
+
+
+"""
+
+
+    spyder_text = """
+dk_repo = "C:/repo/bitstaemr";sg_repo = "C:/stellar-grove"
+import sys;sys.path.append(sg_repo)
+#sys.path.append(dk_repo)
+
+import pybaseball as pyball
+
+df_bwar_bat = pyball.bwar_bat()
+df_bwar_pit = pyball.bwar_pitch()
+
+start = '2024-07-08'
+end = '2024-07-10'
+
+df = pyball.statcast_batter_percentile_ranks(2024)
+df = pyball.statcast_batter_pitch_arsenal(2024, minPA=25)
+
+df_batting_stats = pyball.batting_stats(2023,2024)
+df_batting_stats_bref = pyball.batting_stats_bref(2024)
+df_framing = pyball.statcast_catcher_framing(2024)
+df_pop_time = pyball.statcast_catcher_poptime(2024)
+df_outfielder_jump = pyball.statcast_outfielder_jump(2024)
+#df_statcast_fielding_run_value = pyball.statcast_fielding_run_value(2019, "all")
+
+df_exit_velo = pyball.statcast_pitcher_exitvelo_barrels(2024)
+df_pitcher_expected_stats = pyball.statcast_pitcher_expected_stats(2024)
+df_arsenal_avg_speed = pyball.statcast_pitcher_pitch_arsenal(2024,arsenal_type="avg_speed")
+df_arsenal_avg_spin = pyball.statcast_pitcher_pitch_arsenal(2024,arsenal_type="avg_spin")
+df_arsenal_avg_pct = pyball.statcast_pitcher_pitch_arsenal(2024,arsenal_type="n_")
+df_arsenal_stats = pyball.statcast_pitcher_arsenal_stats(2024)
+#df_pitcher_active_spin = pyball.statcast_pitcher_active_spin(2024)
+df_statcast_pitcher_percentile_ranks = pyball.statcast_pitcher_percentile_ranks(2024)
+df_statcast_sprint_speed = pyball.statcast_sprint_speed(2024)
+df_statcast_running_splits = pyball.statcast_running_splits(2024)
+df_statcast_single_game = pyball.statcast_single_game(529429)
+
+df_statcast_outs_above_average = pyball.statcast_outs_above_average(2024,"all")
+df_statcast_outfield_catch_prob = pyball.statcast_outfield_catch_prob(2024)
+df_statcast_outfielder_jump = pyball.statcast_outfielder_jump(2024)
+df_team_batting = pyball.team_batting(2024)
+df_team_batting_bref = pyball.team_batting_bref("BAL",2024)
+df_team_fielding = pyball.team_fielding(2024,ind=1)
+df_team_fielding_bref = pyball.team_fielding_bref("BAL",2024)
+df_team_game_logs_batting = pyball.team_game_logs(2024,"BAL","batting")
+df_team_game_logs_pitching = pyball.team_game_logs(2024,"BAL","pitching")
+df_team_pitching = pyball.team_pitching(2024,ind=1)
+df_team_pitching_bref = pyball.team_pitching_bref("PHI", 2024)
+#df_top_prospects = pyball.top_prospects("bluejays")
+
+df_standings = pyball.standings(2024)
+
+df = pyball.chadwick_register()
+
+df_framing = pyball.statcast_catcher_framing(2024)
 
 
 """
