@@ -131,6 +131,7 @@ class MLB(object):
             self.start_date = '2024-01-01'
             self.end_date = '2024-12-31'
             self.yesterday = yesterday
+            self.season = date.today().year
             self.log = {}   
 
         def DRAFT(self, year:int, round, keep_stats:bool=True):
@@ -157,12 +158,18 @@ class MLB(object):
             df = pyball.batting_stats_bref(season)
             return df
         
-        def CATCHER_FRAMING(self, season:int=None):
-            df = pyball.statcast_catcher_framing(season)
+        def CATCHER_FRAMING(self, season:int=2024):
+            if season != None:
+                df = pyball.statcast_catcher_framing(season)
+            else:
+                df = pyball.statcast_catcher_framing(self.season)
             return df
 
         def CATCHER_POPTIME(self, season:int=None):
-            df = pyball.statcast_catcher_poptime(season)
+            if season != None:
+                df = pyball.statcast_catcher_poptime(season)
+            else:
+                df = pyball.statcast_catcher_poptime(self.season)
             return df
         
         def OUTFIELDER_JUMP(self, season:int=None):
@@ -266,8 +273,7 @@ class MLB(object):
                 return None
             else:
                 self.write_to_sql(deltas,table_name='statcast')
-                
-            
+                           
     class infrastructure(object):
 
         def __init__(self)->None:
