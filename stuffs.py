@@ -1,4 +1,6 @@
 import os
+import pyodbc as db
+import sqlalchemy
 
 
 class folders(object):
@@ -89,6 +91,23 @@ class urls(object):
 class CREAM(object):
     EQUITY = 'EQUITY'
     ETF = 'ETF'
+
+class connections(object):
+    computerName = os.environ['COMPUTERNAME']
+    MLB_SQL_SERVER_EXPRESS = {
+        'server': f'{computerName}\SQLEXPRESS',
+        'database':'tara',
+        'driver':'driver=SQL Server Native Client 11.0',
+        'schema':'mlb',
+        'trusted':'trusted_connection=yes'
+        }
+    
+    MLB_CONNECTION = (sqlalchemy.create_engine(
+        'mssql+pyodbc://' + MLB_SQL_SERVER_EXPRESS['server'] +
+        '/' + MLB_SQL_SERVER_EXPRESS['database'] + 
+        "?" + MLB_SQL_SERVER_EXPRESS['driver'] , echo=True)
+    )
+
 
 class coding(object):
     webscraping = """
