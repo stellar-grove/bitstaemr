@@ -773,7 +773,6 @@ class Baseball(object):
                        'pitchout'
                        ]
         
-
 class Marketing(object):
 
     class ABTesting(object):
@@ -972,98 +971,147 @@ class Wildlife(object):
         for gen in range(10):
             print(lam)
 
-spyder_text = """
+class KimmyGibler(object):
+    def __init__(self, distribution:str, values:list, size:int) -> None:
+            self.distribution = distribution
+            self.values = values
+            self.size = size
+            self.data = {}
+            self.stats = {}
 
-dk_repo = "C:/repo/bitstaemr";sg_repo = "C:/stellar-grove"
-import sys;sys.path.append(sg_repo)
-import bitstaemr as bits
-#sys.path.append(dk_repo)
+    pulp = {"costs": np.array([5,2,7]),
+            "price": np.array([9, 6, 8]),
+            
+            }
 
+    gibbs = {"num_samples":10000,
+                "mu_x":0,
+                "mu_y":0,
+                "sigma_x":1,
+                "sigma_y":1,
+                "rho":0.5
+                }
 
+    def gibbs_sampler(self,num_samples, mu_x, mu_y, sigma_x, sigma_y, rho):
+        # Initialize x and y to random values
+        x = np.random.normal(mu_x, sigma_x)
+        y = np.random.normal(mu_y, sigma_y)
+        # Initialize arrays to store samples
+        samples_x = np.zeros(num_samples)
+        samples_y = np.zeros(num_samples)
+        # Run Gibbs sampler
+        for i in range(num_samples):
+            # Sample from P(x|y)
+            x = np.random.normal(mu_x + rho * (sigma_x / sigma_y) * (y - mu_y), np.sqrt((1 - rho ** 2) * sigma_x ** 2))
+            # Sample from P(y|x)
+            y = np.random.normal(mu_y + rho * (sigma_y / sigma_x) * (x - mu_x), np.sqrt((1 - rho ** 2) * sigma_y ** 2))
+            # Store samples
+            samples_x[i] = x
+            samples_y[i] = y
+        return samples_x, samples_y
 
+    def run_gibbs(self,num_samples, mu_x, mu_y, sigma_x, sigma_y, rho):
+        samples_x, samples_y = self.gibbs_sampler(num_samples, mu_x, mu_y, sigma_x, sigma_y, rho)
 
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.chains import (SimpleSequentialChain, 
-                              SequentialChain, 
-                              LLMChain)
+    # # Plot the samples
+    # plt.scatter(samples_x, samples_y, s=5)
+    # plt.title('Gibbs Sampling of Bivariate Normal Distribution')
+    # plt.xlabel('x')
+    # plt.ylabel('y')
+    # plt.show()
 
-openai_api_key = bits.tools.get_stones('OPENAI_API_KEY')
+class text(object):
+    spyder_text = """
 
-llm = ChatOpenAI(openai_api_key=openai_api_key)
-
-template = "Give me a simple bullet point outline for a blog post on {topic}"
-first_prompt = ChatPromptTemplate.from_template(template)
-chain_one = LLMChain(llm=llm,prompt=first_prompt)
-
-template2 = "Write a blog post using this outline: {outline}"
-second_prompt = ChatPromptTemplate.from_template(template2)
-chain_two = LLMChain(llm=llm,prompt=second_prompt)
-
-
-full_chain = SimpleSequentialChain(chains=[chain_one,chain_two],
-                                  verbose=True)
-
-result = full_chain.run("Data Engineering")
-print(result)
-
-#-------------------------------------------------------
-template1 = "Give a summary of this employee's performance review:\n{review}"
-prompt1 = ChatPromptTemplate.from_template(template1)
-chain_1 = LLMChain(llm=llm,
-                     prompt=prompt1,
-                     output_key="review_summary")
-
-template2 = "Identify key employee weaknesses in this review summary:\n{review_summary}"
-prompt2 = ChatPromptTemplate.from_template(template2)
-chain_2 = LLMChain(llm=llm,
-                     prompt=prompt2,
-                     output_key="weaknesses")
-
-template3 = "Create a personalized plan to help address and fix these weaknesses:\n{weaknesses}"
-prompt3 = ChatPromptTemplate.from_template(template3)
-chain_3 = LLMChain(llm=llm,
-                     prompt=prompt3,
-                     output_key="final_plan")
-
-
-seq_chain = SequentialChain(chains=[chain_1,chain_2,chain_3],
-                            input_variables=['review'],
-                            output_variables=['review_summary','weaknesses','final_plan'],
-                            verbose=True)
-
-
-employee_review = '''
-Employee Information:
-Name: Joe Schmo
-Position: Software Engineer
-Date of Review: July 14, 2023
-
-Strengths:
-Joe is a highly skilled software engineer with a deep understanding of programming languages, algorithms, and software development best practices. His technical expertise shines through in his ability to efficiently solve complex problems and deliver high-quality code.
-
-One of Joe's greatest strengths is his collaborative nature. He actively engages with cross-functional teams, contributing valuable insights and seeking input from others. His open-mindedness and willingness to learn from colleagues make him a true team player.
-
-Joe consistently demonstrates initiative and self-motivation. He takes the lead in seeking out new projects and challenges, and his proactive attitude has led to significant improvements in existing processes and systems. His dedication to self-improvement and growth is commendable.
-
-Another notable strength is Joe's adaptability. He has shown great flexibility in handling changing project requirements and learning new technologies. This adaptability allows him to seamlessly transition between different projects and tasks, making him a valuable asset to the team.
-
-Joe's problem-solving skills are exceptional. He approaches issues with a logical mindset and consistently finds effective solutions, often thinking outside the box. His ability to break down complex problems into manageable parts is key to his success in resolving issues efficiently.
-
-Weaknesses:
-While Joe possesses numerous strengths, there are a few areas where he could benefit from improvement. One such area is time management. Occasionally, Joe struggles with effectively managing his time, resulting in missed deadlines or the need for additional support to complete tasks on time. Developing better prioritization and time management techniques would greatly enhance his efficiency.
-
-Another area for improvement is Joe's written communication skills. While he communicates well verbally, there have been instances where his written documentation lacked clarity, leading to confusion among team members. Focusing on enhancing his written communication abilities will help him effectively convey ideas and instructions.
-
-Additionally, Joe tends to take on too many responsibilities and hesitates to delegate tasks to others. This can result in an excessive workload and potential burnout. Encouraging him to delegate tasks appropriately will not only alleviate his own workload but also foster a more balanced and productive team environment.
-'''
-
-
-results = seq_chain(employee_review)
-results.keys()
-print(results['final_plan'])
+    dk_repo = "C:/repo/bitstaemr";sg_repo = "C:/stellar-grove"
+    import sys;sys.path.append(sg_repo)
+    import bitstaemr as bits
+    #sys.path.append(dk_repo)
 
 
 
-"""
 
+    from langchain.chat_models import ChatOpenAI
+    from langchain.prompts import ChatPromptTemplate
+    from langchain.chains import (SimpleSequentialChain, 
+                                SequentialChain, 
+                                LLMChain)
+
+    openai_api_key = bits.tools.get_stones('OPENAI_API_KEY')
+
+    llm = ChatOpenAI(openai_api_key=openai_api_key)
+
+    template = "Give me a simple bullet point outline for a blog post on {topic}"
+    first_prompt = ChatPromptTemplate.from_template(template)
+    chain_one = LLMChain(llm=llm,prompt=first_prompt)
+
+    template2 = "Write a blog post using this outline: {outline}"
+    second_prompt = ChatPromptTemplate.from_template(template2)
+    chain_two = LLMChain(llm=llm,prompt=second_prompt)
+
+
+    full_chain = SimpleSequentialChain(chains=[chain_one,chain_two],
+                                    verbose=True)
+
+    result = full_chain.run("Data Engineering")
+    print(result)
+
+    #-------------------------------------------------------
+    template1 = "Give a summary of this employee's performance review:\n{review}"
+    prompt1 = ChatPromptTemplate.from_template(template1)
+    chain_1 = LLMChain(llm=llm,
+                        prompt=prompt1,
+                        output_key="review_summary")
+
+    template2 = "Identify key employee weaknesses in this review summary:\n{review_summary}"
+    prompt2 = ChatPromptTemplate.from_template(template2)
+    chain_2 = LLMChain(llm=llm,
+                        prompt=prompt2,
+                        output_key="weaknesses")
+
+    template3 = "Create a personalized plan to help address and fix these weaknesses:\n{weaknesses}"
+    prompt3 = ChatPromptTemplate.from_template(template3)
+    chain_3 = LLMChain(llm=llm,
+                        prompt=prompt3,
+                        output_key="final_plan")
+
+
+    seq_chain = SequentialChain(chains=[chain_1,chain_2,chain_3],
+                                input_variables=['review'],
+                                output_variables=['review_summary','weaknesses','final_plan'],
+                                verbose=True)
+
+
+    employee_review = '''
+    Employee Information:
+    Name: Joe Schmo
+    Position: Software Engineer
+    Date of Review: July 14, 2023
+
+    Strengths:
+    Joe is a highly skilled software engineer with a deep understanding of programming languages, algorithms, and software development best practices. His technical expertise shines through in his ability to efficiently solve complex problems and deliver high-quality code.
+
+    One of Joe's greatest strengths is his collaborative nature. He actively engages with cross-functional teams, contributing valuable insights and seeking input from others. His open-mindedness and willingness to learn from colleagues make him a true team player.
+
+    Joe consistently demonstrates initiative and self-motivation. He takes the lead in seeking out new projects and challenges, and his proactive attitude has led to significant improvements in existing processes and systems. His dedication to self-improvement and growth is commendable.
+
+    Another notable strength is Joe's adaptability. He has shown great flexibility in handling changing project requirements and learning new technologies. This adaptability allows him to seamlessly transition between different projects and tasks, making him a valuable asset to the team.
+
+    Joe's problem-solving skills are exceptional. He approaches issues with a logical mindset and consistently finds effective solutions, often thinking outside the box. His ability to break down complex problems into manageable parts is key to his success in resolving issues efficiently.
+
+    Weaknesses:
+    While Joe possesses numerous strengths, there are a few areas where he could benefit from improvement. One such area is time management. Occasionally, Joe struggles with effectively managing his time, resulting in missed deadlines or the need for additional support to complete tasks on time. Developing better prioritization and time management techniques would greatly enhance his efficiency.
+
+    Another area for improvement is Joe's written communication skills. While he communicates well verbally, there have been instances where his written documentation lacked clarity, leading to confusion among team members. Focusing on enhancing his written communication abilities will help him effectively convey ideas and instructions.
+
+    Additionally, Joe tends to take on too many responsibilities and hesitates to delegate tasks to others. This can result in an excessive workload and potential burnout. Encouraging him to delegate tasks appropriately will not only alleviate his own workload but also foster a more balanced and productive team environment.
+    '''
+
+
+    results = seq_chain(employee_review)
+    results.keys()
+    print(results['final_plan'])
+
+
+
+    """

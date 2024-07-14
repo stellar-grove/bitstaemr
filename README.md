@@ -15,6 +15,9 @@ The repo is broken in to a few different sections: data, notebooks and then modu
 
 Enjoy!
 
+## Documentation
+While there is information on the folders, etc in the remainder of this README, users can view the docs folder for more information on specific functions.
+
 ## Data
 [Return Home](#navigation)
 ## Notebooks <br>
