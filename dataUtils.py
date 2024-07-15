@@ -9,6 +9,12 @@ import numpy as np
 import pybaseball as pyball
 import sqlalchemy
 import pyodbc as db
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+
+
 
 yesterday = (date.today() - timedelta(days=3)).strftime('%Y-%m-%d')
 
@@ -486,6 +492,30 @@ df_framing = pyball.statcast_catcher_framing(2024)
 
 
 """
+
+class PLL(object):
+    
+    def __init__(self)->None:
+        self.data = {}
+        self.stats = {}
+
+# -----------------------------------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------------------------------  
+    CHROMEDRIVER_PATH = f'{stuffs.web_scraping.CHROMEDRIVER_PATH}'
+    
+    def DOWNLOAD(self):
+        service = Service(executable_path=self.CHROMEDRIVER_PATH)
+        chrome_options = Options()
+        print(stuffs.web_scraping.ARGUMENTS)
+        chrome_options.add_argument(stuffs.web_scraping.ARGUMENTS)
+        driver = webdriver.Chrome(service=service)
+        PLLSTATS_URL = stuffs.urls.PLL_PLAYER_STATS
+        driver.get(PLLSTATS_URL)
+        element = "css-ikf4wi"
+        download_link = driver.find_element(By.CLASS_NAME, element)
+        download_link.click()
+        #driver.quit()
 
 class dosia(object):
     
