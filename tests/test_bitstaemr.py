@@ -1,6 +1,4 @@
 import sys; sys.path.append("C:/stellar-grove/")
-import pytest
-import numpy as np
 import bitstaemr.tools as tools
 import bitstaemr.tests.data.bitstaemr as test_data
 
