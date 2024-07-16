@@ -395,7 +395,7 @@ class web_scraping(object):
     # Load environment variables
     load_dotenv(os.path.join(BASEDIR, 'config.env'))
     CHROMEDRIVER_PATH = "C:/repo/bitstaemr/chromedriver/chromedriver.exe"
-    ARGUMENTS = "--headless"
+    ARGUMENTS = " --headless"
     # URLs
     BOOKSTOSCRAPE_URL = 'https://books.toscrape.com/'
     GOLDBUGS_URL = 'https://www.thegoldbugs.com/'

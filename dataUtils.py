@@ -16,7 +16,7 @@ from selenium.webdriver.chrome.options import Options
 
 
 
-yesterday = (date.today() - timedelta(days=3)).strftime('%Y-%m-%d')
+yesterday = (date.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
 def remove_characters(text):
     cleaned_text = text.replace(r'[^a-zA-Z0-9\s]', '')
