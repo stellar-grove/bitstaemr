@@ -1,5 +1,6 @@
-import sys; sys.path.append("../");sys.path.append("../../")
-import tools
+import sys; sys.path.append("../")
+sys.path.append("../../")
+import bitstaemr.tools as tools
 import data.bitstaemr as test_data
 
 def check_dictionary_keys(dictionary_one:dict, dictionary_two:dict):
