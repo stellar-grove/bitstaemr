@@ -1,4 +1,4 @@
-import sys; sys.path.append("../../")
+import sys; sys.path.append("../../../")
 from bitstaemr import tools
 import bitstaemr.tests.data.bitstaemr as test_data
 
