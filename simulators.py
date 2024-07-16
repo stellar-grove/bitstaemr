@@ -749,7 +749,7 @@ class Baseball(object):
                 print(f"pitch Number: {pitch} had a location of {pitch_location}, which correlates to a {ball_strike}")
             return pitch_location
 
-        hit_type
+        hit_type = ['pop_fly','grounder','line_drive']
 
         #----- Lists, Dictionaries and Constants -----#
 
@@ -797,6 +797,8 @@ class Marketing(object):
                 treatment_data = expon.rvs(scale=1/lam2, size=self.size)
                 self.data['control'] = control_data
                 self.data['treatment'] = treatment_data
+                df_data = pd.DataFrame([control_data,treatment_data]).T
+                self.data["full"] = df_data
 
             if self.distribution.lower() in ["normal", "norm", "n"]:
                 # Exponential distribution parameters
@@ -849,13 +851,7 @@ class Marketing(object):
                 return self.stats
             if plot_visual:
                 self.plotHistograms(self.data['control'], self.data['treatment'])
-        # # Visualize the results
 
-        # plt.xlabel('Time (seconds)')
-        # plt.ylabel('Frequency')
-        # plt.title('A/B Testing Results')
-        # plt.legend()
-        # plt.show()
 
     class Segmentation(object):
         def __init__(self, config={})-> None:
