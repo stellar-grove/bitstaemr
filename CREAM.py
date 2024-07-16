@@ -130,12 +130,12 @@ class AlphaVantage(object):
     def transform_data(self, data:dict):
         if len(data) > 0:
             ts = data['quarterlyReports']
-            dfSrc = pd.DataFrame().from_dict(ts)
-            dfSrc['fiscalDateEnding'] = pd.to_datetime(dfSrc['fiscalDateEnding'])
-            dfSrc['symbol'] = symbol
-            dfSrc['frequency'] = 'quarterly'
-            dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
-            dfSrc = dfSrc.replace('None',0)
+            #dfSrc = pd.DataFrame().from_dict(ts)
+            #dfSrc['fiscalDateEnding'] = pd.to_datetime(dfSrc['fiscalDateEnding'])
+            #dfSrc['symbol'] = symbol
+            #dfSrc['frequency'] = 'quarterly'
+            #dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
+            #dfSrc = dfSrc.replace('None',0)
         
     spyder_text = '''
                         for tkr in lstTkrs:
