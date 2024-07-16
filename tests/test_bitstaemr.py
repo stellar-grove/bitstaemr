@@ -1,5 +1,5 @@
 import sys; sys.path.append("C:/stellar-grove/")
-import bitstaemr.tools as tools
+from . . import tools
 import bitstaemr.tests.data.bitstaemr as test_data
 
 def check_dictionary_keys(dictionary_one:dict, dictionary_two:dict):
