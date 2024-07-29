@@ -76,7 +76,7 @@ def get_llaves(key_set=None):
     llaves = {}
     computerName = os.environ["COMPUTERNAME"]
     userName = os.environ["USERNAME"]
-    server={"name":f'{computerName}\SQLEXPRESS'}
+    server={"name":f'{computerName}\\SQLEXPRESS'}
     workingDirectory={
                     "bitstaemr":"C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/"
                     ,"dkorpon":"C:/Users/DanielKorpon/Stellar Grove/dkorpon - Documents/"
