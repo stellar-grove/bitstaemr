@@ -1,27 +1,36 @@
 sg_repo = "C:/stellar-grove/"
 import sys;sys.path.append(sg_repo)
 import pandas as pd
-import bitstaemr.tools as tools
-import bitstaemr.stuffs as stuffs
+from bitstaemr import (tools as tools,
+                       stuffs as stuffs)
 import tara.distributions as dists
 import numpy as np
 from num2words import num2words
 import datetime as dt
-from scipy.stats import (expon, 
+from scipy.stats import (expon,
                          norm, 
                          poisson,
                          ttest_ind, 
                          ks_2samp,
                          poisson_means_test
                          )
-from sklearn. preprocessing import StandardScaler
+from sklearn.preprocessing import (StandardScaler, LabelEncoder)
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.ensemble import (RandomForestRegressor, RandomForestClassifier)
+from sklearn.model_selection import (TimeSeriesSplit, train_test_split)
 from sklearn.metrics import (mean_squared_error,
-                             mean_absolute_error)
+                             mean_absolute_error,
+                             accuracy_score)
+from sklearn import svm
 from sklearn.cluster import KMeans
+import random
+import math
+import matplotlib.pyplot as plt
+
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+#|                       CLASSES                                                              |
+#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 dcmc = dists.DaCountDeMonteCarlo()
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
@@ -371,68 +380,6 @@ class biostats(object):
             True
 
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
-#|                       Modeling and Simulation Using Python                                 |
-#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
-
-
-#import modsim as sim
-class MSP(object):
-
-    def __init__(self,config={}) -> None:
-        self.config = config
-        self.stats = {"error_details": []}
-        self.data = {}
-
-    
-    def setInitialStates(lstInitialStates):
-        a = lstInitialStates[0]; b = lstInitialStates[1]
-        sm = sim.State(spotA = a,spotB = b)
-        return sm
-
-    def ItemToA(sm):
-        sm.spotA += 1
-        sm.spotB -= 1
-        
-    
-    def ItemToB(sm):
-        sm.spotA -= 1
-        sm.spotB += 1
-
-
-    def make_system(beta, gamma):
-        init = sim.State(s = 89, i = 1, r = 0)
-        init /= init.sum()
-        return sim.System(init=init, t_end=7*14,beta=beta, gamma=gamma)
-
-    def update_func(t, state, system):
-        s, i, r = state.s, state.i, state.r
-
-        infected = system.beta * i * s
-        recovered = system.gamma * i
-
-        s -= infected
-        i += infected - recovered
-        r += recovered
-
-        return sim.State(s=s, i=i, r=r)
-
-
-    def plot_results(S, I, R):
-        S.plot(style='--', label='Susceptible')
-        I.plot(style='-', label='Infected')
-        R.plot(style=':', label='Resistant')
-        sim.decorate(xlabel='Time (days)',
-                ylabel='Fraction of population')
-       
-    def run_simulation(system, update_func):
-        frame = sim.TimeFrame(columns=system.init.index)
-        frame.loc[0] = system.init
-        for t in range(0, system.t_end):
-            frame.loc[t+1] = update_func(t, frame.loc[t], system)
-        
-        return frame
-
-#|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 #|                       Planetary Orbits                                                     |
 #|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 class planetaryorbit(object):
@@ -483,11 +430,6 @@ class MarkovPlaysTetris(object):
 # Grok Inspired  
 #from Bio import SeqIO
 #from Bio.SeqFeature import SeqFeature, FeatureLocation
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.ensemble import RandomForestClassifier
-from sklearn import svm
 
 class GrokSays(object):
 
@@ -587,11 +529,6 @@ class GrokSays(object):
 
         def getData(self):
             return "Pumpkin Head needs to finish this."
-
-
-import random
-import math
-import matplotlib.pyplot as plt
 
 class FlightPath(object):
     
@@ -749,7 +686,7 @@ class Baseball(object):
                 print(f"pitch Number: {pitch} had a location of {pitch_location}, which correlates to a {ball_strike}")
             return pitch_location
 
-        hit_type
+        hit_type = ['pop_fly','grounder','line_drive']
 
         #----- Lists, Dictionaries and Constants -----#
 
@@ -797,6 +734,8 @@ class Marketing(object):
                 treatment_data = expon.rvs(scale=1/lam2, size=self.size)
                 self.data['control'] = control_data
                 self.data['treatment'] = treatment_data
+                df_data = pd.DataFrame([control_data,treatment_data]).T
+                self.data["full"] = df_data
 
             if self.distribution.lower() in ["normal", "norm", "n"]:
                 # Exponential distribution parameters
@@ -849,13 +788,7 @@ class Marketing(object):
                 return self.stats
             if plot_visual:
                 self.plotHistograms(self.data['control'], self.data['treatment'])
-        # # Visualize the results
 
-        # plt.xlabel('Time (seconds)')
-        # plt.ylabel('Frequency')
-        # plt.title('A/B Testing Results')
-        # plt.legend()
-        # plt.show()
 
     class Segmentation(object):
         def __init__(self, config={})-> None:
@@ -909,59 +842,6 @@ class Marketing(object):
             self.perform_analysis()
             self.plot_results()
     
-class MSP(object):
-    SimpleNamespace = type(sys.implementation)
-    class SettableNamespace(SimpleNamespace):
-        """Contains a collection of parameters.
-
-        Used to make a System object.
-
-        Takes keyword arguments and stores them as attributes.
-        """
-        def __init__(self, namespace=None, **kwargs):
-            super().__init__()
-            if namespace:
-                self.__dict__.update(namespace.__dict__)
-            self.__dict__.update(kwargs)
-
-        def get(self, name, default=None):
-            """Look up a variable.
-
-            name: string varname
-            default: value returned if `name` is not present
-            """
-            try:
-                return self.__getattribute__(name, default)
-            except AttributeError:
-                return default
-
-        def set(self, **variables):
-            """Make a copy and update the given variables.
-
-            returns: Params
-            """
-            new = copy(self)
-            new.__dict__.update(variables)
-            return new
-
-    class System(SettableNamespace):
-        """Contains system parameters and their values.
-
-        Takes keyword arguments and stores them as attributes.
-        """
-        pass
-
-    class Params(SettableNamespace):
-        """Contains system parameters and their values.
-
-        Takes keyword arguments and stores them as attributes.
-        """
-        pass
-
-    def State(**variables):
-        """Contains the values of state variables."""
-        return pd.Series(variables, name='state')     
-
 class Wildlife(object):
 
     def __init__(self, config = {}) -> None:

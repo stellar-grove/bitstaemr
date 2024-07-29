@@ -130,12 +130,12 @@ class AlphaVantage(object):
     def transform_data(self, data:dict):
         if len(data) > 0:
             ts = data['quarterlyReports']
-            dfSrc = pd.DataFrame().from_dict(ts)
-            dfSrc['fiscalDateEnding'] = pd.to_datetime(dfSrc['fiscalDateEnding'])
-            dfSrc['symbol'] = symbol
-            dfSrc['frequency'] = 'quarterly'
-            dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
-            dfSrc = dfSrc.replace('None',0)
+            #dfSrc = pd.DataFrame().from_dict(ts)
+            #dfSrc['fiscalDateEnding'] = pd.to_datetime(dfSrc['fiscalDateEnding'])
+            #dfSrc['symbol'] = symbol
+            #dfSrc['frequency'] = 'quarterly'
+            #dfSrc['RowId'] = dfSrc['fiscalDateEnding'].dt.strftime('%Y%m%d') + symbol + dfSrc['frequency']
+            #dfSrc = dfSrc.replace('None',0)
         
     spyder_text = '''
                         for tkr in lstTkrs:
@@ -557,13 +557,6 @@ class infrastructure(object):
         price_data['Date'] = price_data['Date'].dt.strftime("%Y-%m-%d")
         price_data.loc[:,'id'] = price_data['Date'].str.replace("-","") + price_data['ticker']
         return price_data
-    
-        if instrument_type.upper() == stuffs.CREAM.ETF:
-            price_data = price_data.reset_index()
-            price_data['Date'] = price_data['Date'].dt.strftime("%Y-%m-%d")
-            price_data.loc[:,'px_id'] = price_data['Date'].str.replace("-","") + price_data['ticker']
-            price_data = price_data.drop(columns=['Capital Gains'])
-            return price_data
 
     def determine_new_shares(self, price_data):
         data_dir = self.config['data_dir']
@@ -571,30 +564,30 @@ class infrastructure(object):
         px_data = pd.read_csv(file_name)
         deltas = dataUtils.determine_deltas(price_data, px_data, ['px_id', 'px_id'])
         return deltas
-    
-    def process_share_count(self,ticker:str=None, write_to_csv:bool=False, verbose:bool=True):
-        if ticker != None:
-            share_count = stocks(ticker).getShareCount()
-            price_data['ticker'] = ticker
-            price_data = self.transform_prices(price_data,instrument_type)
-            deltas = self.determine_new_prices(price_data)
-            txt = f"""
-                        Writing {deltas.shape}
 
-                        """
+    # def process_share_count(self,ticker:str=None, write_to_csv:bool=False, verbose:bool=True):
+    #     if ticker != None:
+    #         share_count = stocks(ticker).getShareCount()
+    #         price_data['ticker'] = ticker
+    #         price_data = self.transform_prices(price_data,instrument_type)
+    #         deltas = self.determine_new_prices(price_data)
+    #         txt = f"""
+    #                     Writing {deltas.shape}
+
+    #                     """
             
-            if write_to_csv:
-                txt = f"""
-                        Writing {deltas.shape[0]}
+    #         if write_to_csv:
+    #             txt = f"""
+    #                     Writing {deltas.shape[0]}
 
-                        """
-                self.px_to_csv(deltas)
-                print(txt)
+    #                     """
+    #             self.px_to_csv(deltas)
+    #             print(txt)
                 
-        else:
-            price_data = "TICKER NEEDS TO BE INCLUDED"
+    #     else:
+    #         price_data = "TICKER NEEDS TO BE INCLUDED"
 
-        return deltas
+    #     return deltas
 
     def px_to_csv(self, price_data:pd.DataFrame):
         data_dir = self.config['data_dir']

@@ -5,7 +5,7 @@ then run the functions we need run.
 """     
 
 # Import packages needed to run the functions.
-import pandas as pd
+import pandas
 import os
 import numpy as np
 from collections.abc import MutableMapping
@@ -13,15 +13,17 @@ import shutil
 import math
 from sqlalchemy import create_engine, text
 import openai
+import sys; sys.path.append("../")
 
 # ------ Begin Constants ----- #
-peep = os.environ["USERNAME"]
-homeD = f'{os.environ["HOMEDRIVE"]}{os.environ["HOMEPATH"]}'.replace('\\','/')
+class constants():
+    peep = os.environ["USERNAME"]
+    homeD = f'{os.environ["HOMEDRIVE"]}{os.environ["HOMEPATH"]}'.replace('\\','/')
 
-SGWD = f'{homeD}/Stellar Grove/'
-bitsWD = f'{SGWD}/bitstaemr - Documents/'
-korpWD = f'{SGWD}/dkorpon - Documents/'
-taraWD = f'{SGWD}/ticondagrova - Documents/'
+    SGWD = f'{homeD}/Stellar Grove/'
+    bitsWD = f'{SGWD}/bitstaemr - Documents/'
+    korpWD = f'{SGWD}/dkorpon - Documents/'
+    taraWD = f'{SGWD}/ticondagrova - Documents/'
 
 
 
@@ -51,11 +53,11 @@ def flatten_dictionary(d: MutableMapping, parent_key: str = '', sep: str ='_') -
     return dict(items)
 
 def listDictionaryToDataFrame(listDictionary:list):
-    df_final = pd.DataFrame()
+    df_final = pandas.DataFrame()
     for dictionary in listDictionary:
         dictionary = flatten_dictionary(dictionary)
-        df_interim = pd.DataFrame().from_dict(dictionary,orient="index").T
-        df_final = pd.concat([df_final,df_interim],ignore_index = True)
+        df_interim = pandas.DataFrame().from_dict(dictionary,orient="index").T
+        df_final = pandas.concat([df_final,df_interim],ignore_index = True)
     return df_final
 
 def get_stones(key_set:str=None):
@@ -76,7 +78,7 @@ def get_llaves(key_set=None):
     llaves = {}
     computerName = os.environ["COMPUTERNAME"]
     userName = os.environ["USERNAME"]
-    server={"name":f'{computerName}\SQLEXPRESS'}
+    server={"name":f'{computerName}\\SQLEXPRESS'}
     workingDirectory={
                     "bitstaemr":"C:/Users/DanielKorpon/Stellar Grove/bitstaemr - Documents/"
                     ,"dkorpon":"C:/Users/DanielKorpon/Stellar Grove/dkorpon - Documents/"
@@ -204,7 +206,7 @@ def get_llaves(key_set=None):
     return llaves
 
 def get_file(file_path,header=0):
-    data_frame = pd.read_csv(file_path,header)
+    data_frame = pandas.read_csv(file_path,header)
     return data_frame
 
 def move_file(source_path, destination_path):
@@ -229,7 +231,7 @@ class NaturalLangaugeProcessing(object):
     def dataframe_to_database(df, table_name):
         """Convert a pandas dataframe to a database.
             Args:
-                df (dataframe): pd.DataFrame which is to be converted to a database
+                df (dataframe): pandas.DataFrame which is to be converted to a database
                 table_name (string): Name of the table within the database
             Returns:
                 engine: SQLAlchemy engine object
@@ -270,7 +272,7 @@ class NaturalLangaugeProcessing(object):
         """This function creates a prompt for the OpenAI API to generate SQL queries.
 
         Args:
-            df (dataframe): pd.DataFrame object to automtically extract the table columns
+            df (dataframe): pandas.DataFrame object to automtically extract the table columns
             table_name (string): Name of the table within the database
 
             Returns: string containing the prompt for OpenAI

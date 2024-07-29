@@ -1,6 +1,8 @@
 import os
 import pyodbc as db
 import sqlalchemy
+#from dotenv import load_dotenv
+from .tools import get_stones
 
 
 class folders(object):
@@ -18,7 +20,7 @@ class folders(object):
     download = f'C:/Users/{peep}/Downloads/'
     kaggleWD = f'{taraWD}Kaggle/'
     financeWD = f'{taraWD}data/Financial/'
-    server = f'{robot}\SQLEXPRESS'
+    server = f'{robot}\\SQLEXPRESS'
     sniffnet = 'sniffnet.database.windows.net'
     cannabis_data = f'{taraWD}data/Cannabis/'
     udemyWD = f'{bitsWD}Development/Udemy/'
@@ -40,6 +42,26 @@ class constants(object):
     "gas_constant":8.31446261815324,
     "boltzman_constant":1.389649e-23
 }
+
+class dictionaries(object):
+    morse_dict = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..',
+    'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+    'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+    'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+    'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----',
+    '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+    ' ': ' ', ',': '--..--', '.': '.-.-.-', '?': '..--..',
+    '!': '-.-.--', '-': '-....-', '/': '-..-.', '@': '.--.-.',
+    ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.',
+    '_': '..--.-', '"': '.-..-.', '(': '-.--.', ')': '-.--.-',
+    '$': '...-..-', '&': '.-...', "'": '.----.', '[': '-.--.-',
+    ']': '-.--.--', '{': '--.--.', '}': '--..--', '¿': '.-..-.',
+    '¡': '.----'
+    }
 
 class lists(object):
     class MLB(object):
@@ -85,9 +107,11 @@ class lists(object):
         ]
     
 class urls(object):
+    
     SIM_MKT_SEGMENTATION = "https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx"
     DOSIA_MD_DATA_DASHBOARD = "https://cannabis.maryland.gov/Pages/Data-Dashboard.aspx"
-
+    PLL_PLAYER_STATS = "https://stats.premierlacrosseleague.com/player-table"
+    
 class CREAM(object):
     EQUITY = 'EQUITY'
     ETF = 'ETF'
@@ -95,7 +119,7 @@ class CREAM(object):
 class connections(object):
     computerName = os.environ['COMPUTERNAME']
     MLB_SQL_SERVER_EXPRESS = {
-        'server': f'{computerName}\SQLEXPRESS',
+        'server': f'{computerName}\\SQLEXPRESS',
         'database':'tara',
         'driver':'driver=SQL Server Native Client 11.0',
         'schema':'mlb',
@@ -108,6 +132,18 @@ class connections(object):
         "?" + MLB_SQL_SERVER_EXPRESS['driver'] , echo=True)
     )
 
+    STELLAR_GROVE_ON_SNIFFNET = {'server':'sniffnet.database.windows.net',
+                                 'database':'StellarGrove',
+                                 'driver':'SQL Server Native Client 11.0',
+                                 'username':get_stones()['STELLAR_GROVE_ON_SNIFFNET'].split(',')[0],
+                                 'password':get_stones()['STELLAR_GROVE_ON_SNIFFNET'].split(',')[1]
+                                 }
+    STELLAR_GROVE_CONNECTION = (sqlalchemy.create_engine(r'mssql+pyodbc://' + STELLAR_GROVE_ON_SNIFFNET['username'] + ':' 
+                                + STELLAR_GROVE_ON_SNIFFNET['password'] + '@' 
+                                + STELLAR_GROVE_ON_SNIFFNET['server'] + ':1433/' 
+                                + STELLAR_GROVE_ON_SNIFFNET['database'] + '?DRIVER='
+                                + STELLAR_GROVE_ON_SNIFFNET['driver'])
+                                )
 
 class coding(object):
     webscraping = """
@@ -386,3 +422,26 @@ def get_game_events(game_pk):
 game_pk = 634367  # Replace with the game_pk you want to retrieve data for
 get_game_events(game)
 """
+
+class web_scraping(object):
+    # Get the path to the directory this file is in
+    BASEDIR = os.path.abspath(os.path.dirname(__file__))
+    # Load environment variables
+    #load_dotenv(os.path.join(BASEDIR, 'config.env'))
+    CHROMEDRIVER_PATH = "C:/repo/bitstaemr/chromedriver/chromedriver.exe"
+    ARGUMENTS = " --headless"
+    # URLs
+    BOOKSTOSCRAPE_URL = 'https://books.toscrape.com/'
+    GOLDBUGS_URL = 'https://www.thegoldbugs.com/'
+    IMGUR_UPLOAD_URL = 'https://imgur.com/upload'
+    JQUERYUI_URL = 'https://jqueryui.com/'
+    PYTHON_URL = 'https://www.python.org/'
+    PYTHON_DOWNLOAD_URL = 'https://www.python.org/downloads/'
+    QUOTESTOSCRAPE_URL = 'https://quotes.toscrape.com/'
+    SELENIUM_DOCS_SEARCH_URL = 'https://selenium-python.readthedocs.io/search.html'
+    SELENIUM_URL = 'https://www.selenium.dev'
+    WIKIPEDIA_URL = 'https://en.wikipedia.org/wiki/Main_Page'
+
+
+    # Constants
+    WAIT_TIME = 10  # seconds
