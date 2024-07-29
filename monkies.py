@@ -7,10 +7,10 @@ Created on Fri Feb 17 22:07:56 2023
 
 repo = "C:/repo/bitstaemr"
 import sys;sys.path.append(repo)
+sys.path.append("../")
 import secrets
 import string
 from nltk.corpus import words
-from tara import monkies
 from tara.data import dictionaries
 import winsound
 import time
@@ -48,10 +48,10 @@ class stuff(object):
         OTP = stuff.generateCipher(len(word)).upper()
         return OTP
         
-    def generateOTP(sentence):
+    def generateOTP(self,sentence):
         newLine = []
         for word in sentence.split('\n'):
-            newLine.append(monkies.generateOTPWord(word))
+            newLine.append(self.generateOTPWord(word))
         return newLine
 
     def translate_sentence_to_morse(self, sentence):
