@@ -1,5 +1,5 @@
 import sys; sys.path.append("../../")
-from . . import tools
+from . .tools import get_stones
 import pytest
 import data.bitstaemr as test_data
 
@@ -16,6 +16,6 @@ def check_dictionary_values(dictionary_one:dict, dictionary_two:dict):
 class TestTools:
 
     def test_get_stones(self):
-        stones = tools.get_stones('tester_bester')
+        stones = get_stones('tester_bester')
         test_stones = test_data.TEST_STONES['tester_bester']
         assert stones == test_stones
