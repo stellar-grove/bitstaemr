@@ -1,4 +1,4 @@
-import sys; sys.path.append("../../")
+import sys; sys.path.append("../")
 from . .tools import get_stones
 import pytest
 import data.bitstaemr as test_data
