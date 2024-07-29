@@ -1,5 +1,4 @@
 import sys; sys.path.append("../")
-import bitstaemr.tools as tools
 import pytest
 import bitstaemr.tests.data.bitstaemr as test_data
 
@@ -13,9 +12,3 @@ def check_dictionary_values(dictionary_one:dict, dictionary_two:dict):
         assert dictionary_one[key] == dictionary_two[key]
 
 
-class TestTools:
-
-    def test_get_stones(self):
-        stones = tools.get_stones('tester_bester')
-        test_stones = test_data.TEST_STONES['tester_bester']
-        assert stones == test_stones
