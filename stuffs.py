@@ -20,7 +20,7 @@ class folders(object):
     download = f'C:/Users/{peep}/Downloads/'
     kaggleWD = f'{taraWD}Kaggle/'
     financeWD = f'{taraWD}data/Financial/'
-    server = f'{robot}\SQLEXPRESS'
+    server = f'{robot}\\SQLEXPRESS'
     sniffnet = 'sniffnet.database.windows.net'
     cannabis_data = f'{taraWD}data/Cannabis/'
     udemyWD = f'{bitsWD}Development/Udemy/'
