@@ -11,7 +11,7 @@ sys.path.append("../")
 import secrets
 import string
 from nltk.corpus import words
-from tara.data import dictionaries
+from stuffs import dictionaries
 import winsound
 import time
 import numpy as np
