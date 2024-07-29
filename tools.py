@@ -16,13 +16,14 @@ import openai
 import sys; sys.path.append("../")
 
 # ------ Begin Constants ----- #
-peep = os.environ["USERNAME"]
-homeD = f'{os.environ["HOMEDRIVE"]}{os.environ["HOMEPATH"]}'.replace('\\','/')
+class constants():
+    peep = os.environ["USERNAME"]
+    homeD = f'{os.environ["HOMEDRIVE"]}{os.environ["HOMEPATH"]}'.replace('\\','/')
 
-SGWD = f'{homeD}/Stellar Grove/'
-bitsWD = f'{SGWD}/bitstaemr - Documents/'
-korpWD = f'{SGWD}/dkorpon - Documents/'
-taraWD = f'{SGWD}/ticondagrova - Documents/'
+    SGWD = f'{homeD}/Stellar Grove/'
+    bitsWD = f'{SGWD}/bitstaemr - Documents/'
+    korpWD = f'{SGWD}/dkorpon - Documents/'
+    taraWD = f'{SGWD}/ticondagrova - Documents/'
 
 
 
