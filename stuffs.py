@@ -119,7 +119,7 @@ class CREAM(object):
 class connections(object):
     computerName = os.environ['COMPUTERNAME']
     MLB_SQL_SERVER_EXPRESS = {
-        'server': f'{computerName}\SQLEXPRESS',
+        'server': f'{computerName}\\SQLEXPRESS',
         'database':'tara',
         'driver':'driver=SQL Server Native Client 11.0',
         'schema':'mlb',
