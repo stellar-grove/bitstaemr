@@ -2,7 +2,7 @@ import os
 import pyodbc as db
 import sqlalchemy
 #from dotenv import load_dotenv
-from . import tools
+from .tools import get_stones
 
 
 class folders(object):
@@ -135,8 +135,8 @@ class connections(object):
     STELLAR_GROVE_ON_SNIFFNET = {'server':'sniffnet.database.windows.net',
                                  'database':'StellarGrove',
                                  'driver':'SQL Server Native Client 11.0',
-                                 'username':tools.get_stones()['STELLAR_GROVE_ON_SNIFFNET'].split(',')[0],
-                                 'password':tools.get_stones()['STELLAR_GROVE_ON_SNIFFNET'].split(',')[1]
+                                 'username':get_stones()['STELLAR_GROVE_ON_SNIFFNET'].split(',')[0],
+                                 'password':get_stones()['STELLAR_GROVE_ON_SNIFFNET'].split(',')[1]
                                  }
     STELLAR_GROVE_CONNECTION = (sqlalchemy.create_engine(r'mssql+pyodbc://' + STELLAR_GROVE_ON_SNIFFNET['username'] + ':' 
                                 + STELLAR_GROVE_ON_SNIFFNET['password'] + '@' 
