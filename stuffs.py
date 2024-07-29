@@ -1,7 +1,7 @@
 import os
 import pyodbc as db
 import sqlalchemy
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from . import tools
 
 
@@ -427,7 +427,7 @@ class web_scraping(object):
     # Get the path to the directory this file is in
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     # Load environment variables
-    load_dotenv(os.path.join(BASEDIR, 'config.env'))
+    #load_dotenv(os.path.join(BASEDIR, 'config.env'))
     CHROMEDRIVER_PATH = "C:/repo/bitstaemr/chromedriver/chromedriver.exe"
     ARGUMENTS = " --headless"
     # URLs
