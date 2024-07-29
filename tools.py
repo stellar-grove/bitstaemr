@@ -13,6 +13,7 @@ import shutil
 import math
 from sqlalchemy import create_engine, text
 import openai
+import sys; sys.path.append("../")
 
 # ------ Begin Constants ----- #
 peep = os.environ["USERNAME"]
