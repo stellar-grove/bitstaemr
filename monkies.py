@@ -11,7 +11,7 @@ sys.path.append("../")
 import secrets
 import string
 from nltk.corpus import words
-from stuffs import dictionaries
+from bitstaemr.stuffs import dictionaries
 import winsound
 import time
 import numpy as np
