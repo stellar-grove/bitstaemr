@@ -1,6 +1,6 @@
 import sys; sys.path.append("../")
 import pytest
-import monkies as monkies
+import bitstaemr.monkies as monkies
 import bitstaemr.tests.data.bitstaemr as test_data
 
 def check_dictionary_keys(dictionary_one:dict, dictionary_two:dict):
